@@ -17,42 +17,12 @@ android {
         abortOnError false
     }
 
-    signingConfigs {
-        config {
-            keyAlias 'DrumBeat'
-            keyPassword 'drumbeat'
-            storeFile file('../keystore/keystore_drumbeat.jks')
-            storePassword 'drumbeat'
-        }
-    }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    productFlavors {
-        // 独立包
-        independent {
-            manifestPlaceholders = [FLAVOR: "independent"]
-        }
-        // 插件包
-        ghost {
-            manifestPlaceholders = [FLAVOR: "ghost"]
-        }
-    }
-
-    flavorDimensions 'flavor'
-
-    task makeJar(type: Copy) {
-        delete 'build/libs/OAHRService.jar'
-        from('build/intermediates/packaged-classes/independent/release')
-        into('build/libs/')
-        include('classes.jar')
-        rename('classes.jar', 'OAHRService.jar')
-    }
-
-    makeJar.dependsOn(build)
 
 }
 
