@@ -119,7 +119,7 @@ public class BaseWebView extends WebView {
                 if (isSuccess) {
                     errorLayout.setVisibility(GONE);
                 } else {
-//                    errorLayout.setVisibility(VISIBLE);
+                    errorLayout.setVisibility(VISIBLE);
                 }
             }
 
@@ -136,8 +136,8 @@ public class BaseWebView extends WebView {
 
             @Override
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
-                isError = true;
-                isSuccess = false;
+//                isError = true;
+//                isSuccess = false;
             }
         });
 

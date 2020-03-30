@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -27,23 +28,23 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import com.alibaba.fastjson.JSONObject;
+import com.drumbeat.hrlib.bean.DataObject;
+import com.drumbeat.hrlib.net.JsonConverter;
 import com.ess.filepicker.FilePicker;
 import com.ess.filepicker.model.EssFile;
 import com.ess.filepicker.util.Const;
 import com.huantansheng.easyphotos.EasyPhotos;
 import com.huantansheng.easyphotos.callback.SelectCallback;
 import com.huantansheng.easyphotos.models.album.entity.Photo;
+import com.yanzhenjie.kalle.Kalle;
+import com.yanzhenjie.kalle.simple.SimpleCallback;
+import com.yanzhenjie.kalle.simple.SimpleResponse;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import okhttp3.Call;
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
-import okhttp3.Response;
 import top.zibin.luban.Luban;
 
 public class HRActivity extends AppCompatActivity {
@@ -65,6 +66,8 @@ public class HRActivity extends AppCompatActivity {
     public final static int REQUEST_CODE_FROM = 1001;
     private final static int REQUEST_CODE_SELECT_CONSIGNOR = 1002;
     private final static int REQUEST_PERMISSION_CODE = 101;
+    private final static String BASE_URL = "http://192.168.71.8:8866/";
+    private final static String UPLOAD_CONTENT_FILE = "flowable/contentItem/upLoadContentFile";
 
     public static final int RESULT_CODE_OK = 10000;
     private Handler mHandler = new Handler() {
@@ -93,8 +96,8 @@ public class HRActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        AndroidBug5497Workaround.assistActivity(this);
         setContentView(R.layout.activity_hr);
+        AndroidBug5497Workaround.assistActivity(this);
 
         Window window = getWindow();
         View decorView = window.getDecorView();
@@ -145,6 +148,7 @@ public class HRActivity extends AppCompatActivity {
 
             @Override
             public void onErrorClick() {
+                showLoading();
                 webView.loadUrl(URL);
             }
         });
@@ -272,32 +276,7 @@ public class HRActivity extends AppCompatActivity {
      * @param pdfPaths
      */
     private void UploadMessageFiles(final List<String> pdfPaths) {
-        mHandler.sendEmptyMessage(MSG_WHAT_SHOW_LOADING);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                MultipartBody.Part[] files = new MultipartBody.Part[pdfPaths.size()];
-                for (int index = 0; index < pdfPaths.size(); index++) {
-                    File file = new File(pdfPaths.get(index));
-                    RequestBody requestBody = RequestBody.create(MediaType.parse("application/pdf"), file);
-                    MultipartBody.Part mul = MultipartBody.Part.createFormData("files", file.getName(), requestBody);
-                    files[index] = mul;
-                }
-
-                OkHttpUtil.getInstance().upload("", hrToken, files, new OkHttpUtil.NetCall() {
-                    @Override
-                    public void success(Call call, Response response) throws IOException {
-
-                    }
-
-                    @Override
-                    public void failed(Call call, IOException e) {
-
-                    }
-                });
-            }
-        }).run();
-
+//        mHandler.sendEmptyMessage(MSG_WHAT_SHOW_LOADING);
     }
 
     /**
@@ -328,47 +307,72 @@ public class HRActivity extends AppCompatActivity {
      * @param imgPaths
      */
     private void uploadImg(final List<String> imgPaths) {
-        mHandler.sendEmptyMessage(MSG_WHAT_SHOW_LOADING);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    MultipartBody.Part[] files = new MultipartBody.Part[imgPaths.size()];
+        showLoading();
+        try {
+            //压缩
+            List<File> fileList = Luban.with(HRActivity.this)
+                    .load(imgPaths)
+                    .ignoreBy(100)//压缩阈值，小于100K的图片不压缩
+                    .setTargetDir(HRActivity.this.getApplication().getCacheDir().getAbsolutePath())
+                    .get();
 
-                    //压缩
-                    List<File> fileList = Luban.with(HRActivity.this)
-                            .load(imgPaths)
-                            .ignoreBy(100)//压缩阈值，小于100K的图片不压缩
-                            .setTargetDir(HRActivity.this.getApplication().getCacheDir().getAbsolutePath())
-                            .get();
-
-                    //包装为MultipartBody.Part
-                    for (int index = 0; index < fileList.size(); index++) {
-                        File file = fileList.get(index);
-                        RequestBody requestBody = RequestBody.create(MediaType.parse("image/png"), file);
-                        MultipartBody.Part mul = MultipartBody.Part.createFormData("files", file.getName(), requestBody);
-                        files[index] = mul;
-                    }
-
-                    //上传
-                    OkHttpUtil.getInstance().upload("", hrToken, files, new OkHttpUtil.NetCall() {
+            Kalle.post(BASE_URL + UPLOAD_CONTENT_FILE)
+                    .addHeader("Authorization", "Bearer " + hrToken)
+                    .files("files", fileList)
+                    .converter(new JsonConverter())
+                    .perform(new SimpleCallback<DataObject<List<String>>>() {
                         @Override
-                        public void success(Call call, Response response) throws IOException {
-
+                        public void onResponse(SimpleResponse<DataObject<List<String>>, String> response) {
+                            hideLoading();
+                            if (response.isSucceed()) {
+                                DataObject<List<String>> succeed = response.succeed();
+                                List<String> fileIdList = succeed.getData();
+                                if (fileIdList != null && fileIdList.size() > 0) {
+                                    String fileIdStr = null;
+                                    for (String fileId : fileIdList) {
+                                        if (TextUtils.isEmpty(fileIdStr))
+                                            fileIdStr = "'" + fileId;
+                                        else
+                                            fileIdStr += "," + fileId;
+                                    }
+                                    fileIdStr += "'";
+                                    loadJsMethod(callback, fileIdStr + "," + index);
+                                } else {
+                                    showToastLong("上传失败请稍后重试");
+                                }
+                            } else {
+                                hideLoading();
+                                showToastLong("上传失败请稍后重试");
+                            }
                         }
 
-                        @Override
-                        public void failed(Call call, IOException e) {
-
-                        }
                     });
 
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    mHandler.sendEmptyMessage(MSG_WHAT_SELECT_ALBUM_ERROR);
-                }
+        } catch (IOException e) {
+            e.printStackTrace();
+            mHandler.sendEmptyMessage(MSG_WHAT_SELECT_ALBUM_ERROR);
+        }
+
+    }
+
+    /**
+     * 执行JS方法
+     *
+     * @param methodName
+     */
+    private void loadJsMethod(final String methodName, final String param) {
+        Runnable callbackRunnable = new Runnable() {
+            @Override
+            public void run() {
+                String jsCode = "javascript:" + methodName + "(" + param + ")";
+                webView.loadUrl(jsCode);
             }
-        }).start();
+        };
+        if (Looper.getMainLooper() == Looper.myLooper()) {
+            callbackRunnable.run();
+        } else {
+            new Handler(Looper.getMainLooper()).post(callbackRunnable);
+        }
     }
 
     @Override
@@ -389,13 +393,11 @@ public class HRActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-
-        webView.goBack();
-//        if (webView.canGoBack()) {
-//            webView.goBack();
-//        } else {
-//            finish();
-//        }
+        if (webView.isSuccess()) {
+            loadJsMethod("androidBack", "");
+        } else {
+            finish();
+        }
     }
 
     @JavascriptInterface
