@@ -1,0 +1,69 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.2"
+
+    defaultConfig {
+        minSdkVersion 15
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'consumer-rules.pro'
+    }
+    lintOptions {
+        abortOnError false
+    }
+
+    signingConfigs {
+        config {
+            keyAlias 'DrumBeat'
+            keyPassword 'drumbeat'
+            storeFile file('../keystore/keystore_drumbeat.jks')
+            storePassword 'drumbeat'
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    productFlavors {
+        // 独立包
+        independent {
+            manifestPlaceholders = [FLAVOR: "independent"]
+        }
+        // 插件包
+        ghost {
+            manifestPlaceholders = [FLAVOR: "ghost"]
+        }
+    }
+
+    flavorDimensions 'flavor'
+
+    task makeJar(type: Copy) {
+        delete 'build/libs/OAHRService.jar'
+        from('build/intermediates/packaged-classes/independent/release')
+        into('build/libs/')
+        include('classes.jar')
+        rename('classes.jar', 'OAHRService.jar')
+    }
+
+    makeJar.dependsOn(build)
+
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.0.0'
+    implementation 'com.alibaba:fastjson:1.2.67'
+    implementation 'com.github.HuanTanSheng:EasyPhotos:2.4.4'
+    implementation 'com.github.bumptech.glide:glide:4.10.0'
+    implementation 'top.zibin:Luban:1.1.8'
+    implementation 'com.github.githubAtom:filepicker:1.0.0'
+
+}

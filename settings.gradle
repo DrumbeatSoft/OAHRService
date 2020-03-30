@@ -1,0 +1,2 @@
+include ':app', ':hrservice'
+rootProject.name='OAHRService'
