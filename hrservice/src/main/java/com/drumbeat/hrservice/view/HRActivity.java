@@ -25,13 +25,13 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import com.drumbeat.hrservice.R;
+import com.drumbeat.hrservice.net.DataObject;
+import com.drumbeat.hrservice.net.JsonConverter;
 import com.drumbeat.hrservice.util.AndroidBug5497Workaround;
 import com.drumbeat.hrservice.util.ImageEngineForEasyPhotos;
 import com.drumbeat.hrservice.util.LogUtils;
-import com.drumbeat.hrservice.R;
 import com.drumbeat.hrservice.util.Watermark;
-import com.drumbeat.hrservice.net.DataObject;
-import com.drumbeat.hrservice.net.JsonConverter;
 import com.ess.filepicker.FilePicker;
 import com.ess.filepicker.model.EssFile;
 import com.ess.filepicker.util.Const;
@@ -59,7 +59,13 @@ public class HRActivity extends AppCompatActivity {
     private final static int REQUEST_CODE_FROM_ACTIVITY = 1000;
     public final static int REQUEST_CODE_FROM = 1001;
     private final static int REQUEST_PERMISSION_CODE = 101;
-    private final static String BASE_URL = "http://192.168.71.8:8866/";
+    //    private final static String BASE_URL = "http://192.168.71.8:8866/";//测试
+    //    private final static String BASE_URL_H5 = "http://192.168.70.35:8088/#/attendance-management?hrToken=";//测试 雷鸣
+    //    private final static String BASE_URL_H5 = "http://192.168.70.95:8088/#/attendance-management?hrToken=";//测试 李昂
+
+    private final static String BASE_URL_H5 = "http://47.92.129.101:8822/#/attendance-management?hrToken=";//生产
+    private final static String BASE_URL = "http://47.92.129.101:8866/"; //生产
+
     private final static String UPLOAD_CONTENT_FILE = "flowable/contentItem/upLoadContentFile";
     private String callback;
     private int index;
@@ -91,9 +97,7 @@ public class HRActivity extends AppCompatActivity {
     @SuppressLint("JavascriptInterface")
     private void initWebView() {
         hrToken = getIntent().getExtras().getString("hrToken");
-        //final String URL = "http://192.168.70.35:8088/#/attendance-management?hrToken=" + hrToken;
-        final String URL = "http://192.168.70.95:8088/#/attendance-management?hrToken=" + hrToken;
-
+        final String URL = BASE_URL_H5 + hrToken;
         WebSettings webSettings = webView.getSettings();
         webSettings.setAllowContentAccess(true);
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);     //设置js可以直接打开窗口，如window.open()，默认为false
@@ -283,7 +287,7 @@ public class HRActivity extends AppCompatActivity {
                                     for (String fileId : fileIdList) {
                                         fileIdStr.append(fileId).append(",");
                                     }
-                                    loadJsMethod(callback, "'" +fileIdStr + "'," + index);
+                                    loadJsMethod(callback, "'" + fileIdStr + "'," + index);
                                 } else {
                                     uplodImgFile();
                                 }
