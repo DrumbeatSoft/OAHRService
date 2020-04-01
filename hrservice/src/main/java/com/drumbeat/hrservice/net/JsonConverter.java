@@ -1,7 +1,7 @@
-package com.drumbeat.hrlib.net;
+package com.drumbeat.hrservice.net;
 
 import com.alibaba.fastjson.JSONObject;
-import com.drumbeat.hrlib.bean.DataObject;
+import com.drumbeat.hrservice.util.LogUtils;
 import com.yanzhenjie.kalle.Response;
 import com.yanzhenjie.kalle.simple.Converter;
 import com.yanzhenjie.kalle.simple.SimpleResponse;
@@ -17,6 +17,9 @@ public class JsonConverter implements Converter {
 
         int code = response.code();
         String data = response.body().string();
+        LogUtils.debug("convert data:" + data);
+        LogUtils.debug("convert code:" + code);
+
         if (code >= 200 && code < 300) { // Http请求成功。
             DataObject httpEntity;
             try {
@@ -31,18 +34,18 @@ public class JsonConverter implements Converter {
                 try {
                     if (succeed == Integer.class) {
                         Integer succeedInt = Integer.parseInt(data);
-                        succeedData = (S)succeedInt;
+                        succeedData = (S) succeedInt;
                     } else if (succeed == Long.class) {
                         Long succeedLong = Long.parseLong(data);
-                        succeedData = (S)succeedLong;
+                        succeedData = (S) succeedLong;
                     } else if (succeed == String.class) {
-                        succeedData = (S)data;
+                        succeedData = (S) data;
                     } else if (succeed == Boolean.class) {
                         Boolean succeedBoolean = Boolean.parseBoolean(data);
-                        succeedData = (S)succeedBoolean;
+                        succeedData = (S) succeedBoolean;
                     } else if (succeed == JSONObject.class) {
                         JSONObject object = JSONObject.parseObject(data);
-                        succeedData = (S)object;
+                        succeedData = (S) object;
                     } else {
                         succeedData = JSONObject.parseObject(data, succeed);
                     }

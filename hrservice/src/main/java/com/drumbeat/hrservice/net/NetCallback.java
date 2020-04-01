@@ -1,4 +1,4 @@
-package com.drumbeat.hrlib.net;
+package com.drumbeat.hrservice.net;
 
 public interface NetCallback {
     void onSuccess(String succeed);

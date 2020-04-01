@@ -1,4 +1,4 @@
-package com.drumbeat.hrlib;
+package com.drumbeat.hrservice.view;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -16,6 +16,8 @@ import androidx.annotation.ColorRes;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+
+import com.drumbeat.hrservice.R;
 
 /**
  * 自定义圆形进度条
@@ -76,7 +78,7 @@ public class CustomLoading {
 
     public void show() {
 
-        View customLoading = View.inflate(context, R.layout.baselib_view_custom_loading, null);
+        View customLoading = View.inflate(context, R.layout.hr_view_custom_loading, null);
 
         ivLoading = customLoading.findViewById(R.id.ivLoading);
 
@@ -102,7 +104,7 @@ public class CustomLoading {
             rotateAnimation.setDuration(durationMillis);
         }
 
-        mLoadingDialog = new Dialog(context, R.style.baselib_LoadingDialog);
+        mLoadingDialog = new Dialog(context, R.style.hr_LoadingDialog);
         // 设置返回键无效
         mLoadingDialog.setCancelable(cancelable);
         mLoadingDialog.setContentView(customLoading, new LinearLayout.LayoutParams(

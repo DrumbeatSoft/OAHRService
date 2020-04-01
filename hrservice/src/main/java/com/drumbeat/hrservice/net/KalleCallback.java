@@ -1,4 +1,4 @@
-package com.drumbeat.hrlib.net;
+package com.drumbeat.hrservice.net;
 
 import com.yanzhenjie.kalle.simple.Callback;
 import com.yanzhenjie.kalle.simple.SimpleResponse;

@@ -1,4 +1,4 @@
-package com.drumbeat.hrlib;
+package com.drumbeat.hrservice.view;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -24,6 +24,9 @@ import android.widget.TextView;
 import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 
+import com.drumbeat.hrservice.util.LogUtils;
+import com.drumbeat.hrservice.R;
+
 /**
  * 带进度条的WebView
  * wtq 2016年6月28日14:09:46
@@ -40,7 +43,6 @@ public class BaseWebView extends WebView {
     public void setWebViewListener(WebViewListener mWebViewListener) {
         this.mWebViewListener = mWebViewListener;
     }
-
 
     @SuppressLint("SetJavaScriptEnabled")
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -76,6 +78,7 @@ public class BaseWebView extends WebView {
             public void onReceivedTitle(WebView view, String title) {
                 super.onReceivedTitle(view, title);
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                    LogUtils.debug("onReceivedTitle:" + title);
                     if (title.contains("404") || title.contains("500") || title.contains("Error") || title.contains("找不到网页") || title.contains("网页无法打开")) {
                         isError = true;
                         isSuccess = false;
@@ -126,16 +129,18 @@ public class BaseWebView extends WebView {
             @Override
             public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
                 super.onReceivedHttpError(view, request, errorResponse);
-
                 int statusCode = errorResponse.getStatusCode();
+                LogUtils.debug("onReceivedHttpError:" + statusCode);
                 if (404 == statusCode || 500 == statusCode) {
                     isError = true;
                     isSuccess = false;
                 }
             }
 
+            @RequiresApi(api = Build.VERSION_CODES.M)
             @Override
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                LogUtils.debug("onReceivedError:" + error.getDescription().toString());
 //                isError = true;
 //                isSuccess = false;
             }
@@ -147,7 +152,7 @@ public class BaseWebView extends WebView {
         LinearLayout linearLayout = new LinearLayout(context);
         linearLayout.setGravity(Gravity.CENTER);
         linearLayout.setOrientation(LinearLayout.VERTICAL);
-        linearLayout.setBackgroundColor(ContextCompat.getColor(context, R.color.white));
+        linearLayout.setBackgroundColor(ContextCompat.getColor(context, R.color.hr_white));
         linearLayout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
         ImageView imageView = new ImageView(context);
@@ -156,12 +161,12 @@ public class BaseWebView extends WebView {
         params.height = 200;
         params.setMargins(0, 0, 0, 30);
         imageView.setLayoutParams(params);
-        imageView.setImageResource(R.drawable.baselib_ic_empty);
+        imageView.setImageResource(R.drawable.hr_ic_empty);
         linearLayout.addView(imageView);
 
         TextView textView = new TextView(context);
         textView.setText("数据加载失败，点击重试");
-        textView.setTextColor(ContextCompat.getColor(context, R.color.color_333333));
+        textView.setTextColor(ContextCompat.getColor(context, R.color.hr_color_333333));
         textView.setTextSize(14);
         textView.setOnClickListener(new OnClickListener() {
             @Override

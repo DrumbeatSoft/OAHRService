@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/flContainer"
+    android:id="@+id/hr_flContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".HRActivity">
+    tools:context=".view.HRActivity">
 
-    <com.drumbeat.hrlib.BaseWebView
-        android:id="@+id/webView"
+    <com.drumbeat.hrservice.view.BaseWebView
+        android:id="@+id/hr_webView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scrollbars="none" />

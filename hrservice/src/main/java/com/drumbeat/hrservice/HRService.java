@@ -1,8 +1,10 @@
-package com.drumbeat.hrlib;
+package com.drumbeat.hrservice;
 
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+
+import com.drumbeat.hrservice.view.HRActivity;
 
 /**
  * 提供OA HR 服务
@@ -15,7 +17,6 @@ public class HRService {
      * @param context      上下文
      * @param hrToken      hr身份令牌
      * @param watermarkStr 水印文字
-     * @return
      */
     public static void openHR(Context context, String hrToken, String watermarkStr) {
         Intent intent = new Intent();
@@ -32,7 +33,6 @@ public class HRService {
      *
      * @param context 上下文
      * @param hrToken hr身份令牌
-     * @return
      */
     public static void openHR(Context context, String hrToken) {
         Intent intent = new Intent();

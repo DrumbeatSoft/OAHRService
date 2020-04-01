@@ -1,4 +1,4 @@
-package com.drumbeat.hrlib;
+package com.drumbeat.hrservice.util;
 
 import android.content.Context;
 import android.graphics.Bitmap;

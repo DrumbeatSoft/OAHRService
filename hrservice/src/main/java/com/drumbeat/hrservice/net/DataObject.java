@@ -1,4 +1,4 @@
-package com.drumbeat.hrlib.bean;
+package com.drumbeat.hrservice.net;
 
 /**
  * 接口返回的最外层数据结构

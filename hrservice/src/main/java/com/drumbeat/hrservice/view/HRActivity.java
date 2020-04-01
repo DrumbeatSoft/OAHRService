@@ -1,4 +1,4 @@
-package com.drumbeat.hrlib;
+package com.drumbeat.hrservice.view;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -11,8 +11,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
-import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -27,9 +25,13 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
-import com.alibaba.fastjson.JSONObject;
-import com.drumbeat.hrlib.bean.DataObject;
-import com.drumbeat.hrlib.net.JsonConverter;
+import com.drumbeat.hrservice.util.AndroidBug5497Workaround;
+import com.drumbeat.hrservice.util.ImageEngineForEasyPhotos;
+import com.drumbeat.hrservice.util.LogUtils;
+import com.drumbeat.hrservice.R;
+import com.drumbeat.hrservice.util.Watermark;
+import com.drumbeat.hrservice.net.DataObject;
+import com.drumbeat.hrservice.net.JsonConverter;
 import com.ess.filepicker.FilePicker;
 import com.ess.filepicker.model.EssFile;
 import com.ess.filepicker.util.Const;
@@ -50,44 +52,15 @@ import top.zibin.luban.Luban;
 public class HRActivity extends AppCompatActivity {
     private BaseWebView webView;
     private FrameLayout flContainer;
-
     private CustomLoading customLoading;
-
-    private final static int MSG_WHAT_SELECT_ALBUM = 101;
-    private final static int MSG_WHAT_SHOW_LOADING = 102;
-    private final static int MSG_WHAT_SELECT_ALBUM_ERROR = 103;//从相册选择图片失败
-    //读写权限
     private static String[] PERMISSIONS_STORAGE = {
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE};
-    //跳转第三方的文件管理
     private final static int REQUEST_CODE_FROM_ACTIVITY = 1000;
-    //请求状态码
     public final static int REQUEST_CODE_FROM = 1001;
-    private final static int REQUEST_CODE_SELECT_CONSIGNOR = 1002;
     private final static int REQUEST_PERMISSION_CODE = 101;
     private final static String BASE_URL = "http://192.168.71.8:8866/";
     private final static String UPLOAD_CONTENT_FILE = "flowable/contentItem/upLoadContentFile";
-
-    public static final int RESULT_CODE_OK = 10000;
-    private Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_WHAT_SELECT_ALBUM:
-                    selectAlbum(msg.arg1);
-                    break;
-                case MSG_WHAT_SHOW_LOADING:
-                    showLoading();
-                    break;
-                case MSG_WHAT_SELECT_ALBUM_ERROR:
-                    showToastLong("操作失败，请稍后重试");
-                    hideLoading();
-                    break;
-            }
-        }
-    };
-
     private String callback;
     private int index;
     private String hrToken;
@@ -96,7 +69,7 @@ public class HRActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_hr);
+        setContentView(R.layout.hr_activity_hr);
         AndroidBug5497Workaround.assistActivity(this);
 
         Window window = getWindow();
@@ -108,8 +81,8 @@ public class HRActivity extends AppCompatActivity {
             window.setStatusBarColor(Color.TRANSPARENT);
         }
 
-        flContainer = findViewById(R.id.flContainer);
-        webView = findViewById(R.id.webView);
+        flContainer = findViewById(R.id.hr_flContainer);
+        webView = findViewById(R.id.hr_webView);
         Watermark.getInstance().show(flContainer, getIntent().getExtras().getString("watermarkStr"));
         customLoading = new CustomLoading(this);
         initWebView();
@@ -173,10 +146,18 @@ public class HRActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Toast
+     *
+     * @param msg
+     */
     public void showToastLong(String msg) {
         Toast.makeText(this, msg, Toast.LENGTH_LONG);
     }
 
+    /**
+     * @param index
+     */
     @JavascriptInterface
     public void TuneUpPdf(int index) {
         this.index = index;
@@ -203,15 +184,15 @@ public class HRActivity extends AppCompatActivity {
      *
      * @param methodName
      */
-    private void FormJsMethod(final String methodName, final JSONObject param) {
+    private void loadJsMethod(final String methodName, final String param) {
         Runnable callbackRunnable = new Runnable() {
             @Override
             public void run() {
-                String jsCode = "javascript:" + methodName + "(" + param + "" + ")";
+                String jsCode = "javascript:" + methodName + "(" + param + ")";
+                LogUtils.debug("loadJsMethod:" + jsCode);
                 webView.loadUrl(jsCode);
             }
         };
-
         if (Looper.getMainLooper() == Looper.myLooper()) {
             callbackRunnable.run();
         } else {
@@ -237,7 +218,7 @@ public class HRActivity extends AppCompatActivity {
 //                        }
 //                        String Stringjson = "{\"processInstanceId\":\"" + formback + "\"}";
 //                        JSONObject jsonObject = JSONObject.parseObject(Stringjson);
-//                        FormJsMethod("SubmitAssociationForm", jsonObject);
+//                        loadJsMethod("SubmitAssociationForm", jsonObject);
 //
 //                        if (selectBusiness.size() == 0) {
 //                            showToastLong("小可爱，没有选择关联表单！");
@@ -249,23 +230,18 @@ public class HRActivity extends AppCompatActivity {
                 break;
             case REQUEST_CODE_FROM_ACTIVITY:
                 if (data == null) {
-                    Toast.makeText(getApplicationContext(), "小可爱！没有选择pdf文件", Toast.LENGTH_SHORT).show();
+                    showToastLong("小可爱！没有选择pdf文件");
                 } else {
                     ArrayList<EssFile> essFileList = data.getParcelableArrayListExtra(Const.EXTRA_RESULT_SELECTION);
-                    Toast.makeText(getApplicationContext(), "选中了" + essFileList.size() + "个文件" + essFileList.toString(), Toast.LENGTH_SHORT).show();
                     List<String> list = new ArrayList<>();
                     for (int i = 0; i < essFileList.size(); i++) {
                         list.add(essFileList.get(i).getAbsolutePath());
                     }
-                    Toast.makeText(getApplicationContext(), "selected " + list.size(), Toast.LENGTH_SHORT).show();
                     UploadMessageFiles(list);
+                    showToastLong("选中了" + list.size() + "个文件" + essFileList.toString());
                 }
                 break;
-            case REQUEST_CODE_SELECT_CONSIGNOR:
-                if (resultCode == RESULT_CODE_OK) {
-                    finish();
-                }
-                break;
+
         }
 
     }
@@ -276,46 +252,21 @@ public class HRActivity extends AppCompatActivity {
      * @param pdfPaths
      */
     private void UploadMessageFiles(final List<String> pdfPaths) {
-//        mHandler.sendEmptyMessage(MSG_WHAT_SHOW_LOADING);
-    }
-
-    /**
-     * 从相册中选择图片
-     */
-    private void selectAlbum(int count) {
-        EasyPhotos.createAlbum(this, true, ImageEngineForEasyPhotos.getInstance())
-                .setFileProviderAuthority(this.getApplication().getPackageName() + ".fileProvider")
-                .setCount(count)
-                .setGif(false)//是否显示Gif图，默认不显示
-                .setVideo(false)//是否显示视频，默认不显示
-                .setPuzzleMenu(false)//是否显示拼图按钮，默认显示
-                .setCleanMenu(true)//是否显示清空按钮，默认显示
-                .start(new SelectCallback() {
-                    @Override
-                    public void onResult(ArrayList<Photo> photos, ArrayList<String> paths, boolean isOriginal) {
-                        //上传图片
-                        if (paths != null && paths.size() > 0) {
-                            uploadImg(paths);
-                        }
-                    }
-                });
     }
 
     /**
      * 压缩并上传图片
      *
-     * @param imgPaths
+     * @param imgPaths 图片路径集合
      */
     private void uploadImg(final List<String> imgPaths) {
         showLoading();
         try {
-            //压缩
             List<File> fileList = Luban.with(HRActivity.this)
                     .load(imgPaths)
-                    .ignoreBy(100)//压缩阈值，小于100K的图片不压缩
+                    .ignoreBy(100)
                     .setTargetDir(HRActivity.this.getApplication().getCacheDir().getAbsolutePath())
                     .get();
-
             Kalle.post(BASE_URL + UPLOAD_CONTENT_FILE)
                     .addHeader("Authorization", "Bearer " + hrToken)
                     .files("files", fileList)
@@ -328,21 +279,16 @@ public class HRActivity extends AppCompatActivity {
                                 DataObject<List<String>> succeed = response.succeed();
                                 List<String> fileIdList = succeed.getData();
                                 if (fileIdList != null && fileIdList.size() > 0) {
-                                    String fileIdStr = null;
+                                    StringBuilder fileIdStr = new StringBuilder();
                                     for (String fileId : fileIdList) {
-                                        if (TextUtils.isEmpty(fileIdStr))
-                                            fileIdStr = "'" + fileId;
-                                        else
-                                            fileIdStr += "," + fileId;
+                                        fileIdStr.append(fileId).append(",");
                                     }
-                                    fileIdStr += "'";
-                                    loadJsMethod(callback, fileIdStr + "," + index);
+                                    loadJsMethod(callback, "'" +fileIdStr + "'," + index);
                                 } else {
-                                    showToastLong("上传失败请稍后重试");
+                                    uplodImgFile();
                                 }
                             } else {
-                                hideLoading();
-                                showToastLong("上传失败请稍后重试");
+                                uplodImgFile();
                             }
                         }
 
@@ -350,29 +296,16 @@ public class HRActivity extends AppCompatActivity {
 
         } catch (IOException e) {
             e.printStackTrace();
-            mHandler.sendEmptyMessage(MSG_WHAT_SELECT_ALBUM_ERROR);
+            uplodImgFile();
         }
-
     }
 
     /**
-     * 执行JS方法
-     *
-     * @param methodName
+     * 上传图片失败，关闭加载框、提示错误信息
      */
-    private void loadJsMethod(final String methodName, final String param) {
-        Runnable callbackRunnable = new Runnable() {
-            @Override
-            public void run() {
-                String jsCode = "javascript:" + methodName + "(" + param + ")";
-                webView.loadUrl(jsCode);
-            }
-        };
-        if (Looper.getMainLooper() == Looper.myLooper()) {
-            callbackRunnable.run();
-        } else {
-            new Handler(Looper.getMainLooper()).post(callbackRunnable);
-        }
+    private void uplodImgFile() {
+        showToastLong("上传失败请稍后重试");
+        hideLoading();
     }
 
     @Override
@@ -391,6 +324,9 @@ public class HRActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * 返回事件全部交给H5来处理，除非页面报错
+     */
     @Override
     public void onBackPressed() {
         if (webView.isSuccess()) {
@@ -400,6 +336,11 @@ public class HRActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * 去选择PDF文件
+     *
+     * @param string
+     */
     @JavascriptInterface
     public void fromShowPdfFile(String string) {
 //        JSONObject jsonObject = JSONObject.parseObject(string);
@@ -415,14 +356,35 @@ public class HRActivity extends AppCompatActivity {
 //        startActivity(PdfViewerActivity.class, bundle1);
     }
 
+    /**
+     * 从相册中选择图片
+     *
+     * @param callback
+     * @param count
+     * @param index
+     */
     @JavascriptInterface
-    public void selectAlbum(String callback, int count, int index) {
+    public void selectAlbum(String callback, final int count, int index) {
         this.callback = callback;
         this.index = index;
-        Message msg = new Message();
-        msg.what = MSG_WHAT_SELECT_ALBUM;
-        msg.arg1 = count;
-        mHandler.sendMessage(msg);
+
+        EasyPhotos.createAlbum(this, true, ImageEngineForEasyPhotos.getInstance())
+                .setFileProviderAuthority(this.getApplication().getPackageName() + ".fileProvider")
+                .setCount(count)
+                .setGif(false)//是否显示Gif图，默认不显示
+                .setVideo(false)//是否显示视频，默认不显示
+                .setPuzzleMenu(false)//是否显示拼图按钮，默认显示
+                .setCleanMenu(true)//是否显示清空按钮，默认显示
+                .start(new SelectCallback() {
+                    @Override
+                    public void onResult(ArrayList<Photo> photos, ArrayList<String> paths, boolean isOriginal) {
+                        //上传图片
+                        if (paths != null && paths.size() > 0) {
+                            uploadImg(paths);
+                        }
+                    }
+                });
+
     }
 
     /**
@@ -435,6 +397,8 @@ public class HRActivity extends AppCompatActivity {
 
     /**
      * 打电话
+     *
+     * @param phone 手机号码
      */
     @JavascriptInterface
     public void ringUp(String phone) {

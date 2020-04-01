@@ -5,7 +5,7 @@ import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.drumbeat.hrlib.HRService;
+import com.drumbeat.hrservice.HRService;
 
 public class MainActivity extends AppCompatActivity {
 

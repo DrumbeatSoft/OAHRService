@@ -1,4 +1,4 @@
-package com.drumbeat.hrlib;
+package com.drumbeat.hrservice.util;
 
 import android.app.Activity;
 import android.graphics.Rect;
