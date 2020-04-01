@@ -369,7 +369,7 @@ public class HRActivity extends AppCompatActivity {
         this.index = index;
 
         EasyPhotos.createAlbum(this, true, ImageEngineForEasyPhotos.getInstance())
-                .setFileProviderAuthority(this.getApplication().getPackageName() + ".fileProvider")
+                .setFileProviderAuthority(this.getApplication().getPackageName() + ".hrservice.fileProvider")
                 .setCount(count)
                 .setGif(false)//是否显示Gif图，默认不显示
                 .setVideo(false)//是否显示视频，默认不显示
