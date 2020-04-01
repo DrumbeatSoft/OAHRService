@@ -59,12 +59,12 @@ public class HRActivity extends AppCompatActivity {
     private final static int REQUEST_CODE_FROM_ACTIVITY = 1000;
     public final static int REQUEST_CODE_FROM = 1001;
     private final static int REQUEST_PERMISSION_CODE = 101;
-    //    private final static String BASE_URL = "http://192.168.71.8:8866/";//测试
+        private final static String BASE_URL = "http://192.168.71.8:8866/";//测试
     //    private final static String BASE_URL_H5 = "http://192.168.70.35:8088/#/attendance-management?hrToken=";//测试 雷鸣
-    //    private final static String BASE_URL_H5 = "http://192.168.70.95:8088/#/attendance-management?hrToken=";//测试 李昂
+        private final static String BASE_URL_H5 = "http://192.168.70.95:8088/#/attendance-management?hrToken=";//测试 李昂
 
-    private final static String BASE_URL_H5 = "http://47.92.129.101:8822/#/attendance-management?hrToken=";//生产
-    private final static String BASE_URL = "http://47.92.129.101:8866/"; //生产
+//    private final static String BASE_URL_H5 = "http://47.92.129.101:8822/#/attendance-management?hrToken=";//生产
+//    private final static String BASE_URL = "http://47.92.129.101:8866/"; //生产
 
     private final static String UPLOAD_CONTENT_FILE = "flowable/contentItem/upLoadContentFile";
     private String callback;
