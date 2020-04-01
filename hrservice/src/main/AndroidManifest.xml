@@ -8,7 +8,7 @@
             android:screenOrientation="portrait" />
 
         <provider
-            android:name="androidx.core.content.FileProvider"
+            android:name="com.ess.filepicker.model.EssFileProvider"
             android:authorities="${applicationId}.hrservice.fileProvider"
             android:exported="false"
             android:grantUriPermissions="true"
