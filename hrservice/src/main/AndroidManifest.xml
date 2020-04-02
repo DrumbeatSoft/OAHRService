@@ -5,7 +5,8 @@
     <application>
         <activity
             android:name="com.drumbeat.hrservice.view.HRActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/hr_AppTheme" />
 
         <provider
             android:name=".util.HRFileProvider"

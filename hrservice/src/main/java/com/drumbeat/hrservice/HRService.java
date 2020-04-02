@@ -6,41 +6,72 @@ import android.os.Bundle;
 
 import com.drumbeat.hrservice.view.HRActivity;
 
+import java.lang.ref.WeakReference;
+
 /**
  * 提供OA HR 服务
  */
 public class HRService {
+    private final WeakReference<Context> mContext;
+    private String hrToken;
+    private String watermarkStr;
+    private boolean isTestService;
 
-    /**
-     * 打开HR界面
-     *
-     * @param context      上下文
-     * @param hrToken      hr身份令牌
-     * @param watermarkStr 水印文字
-     */
-    public static void openHR(Context context, String hrToken, String watermarkStr) {
-        Intent intent = new Intent();
-        intent.setClass(context.getApplicationContext(), HRActivity.class);
-        Bundle bundle = new Bundle();
-        bundle.putString("watermarkStr", watermarkStr);
-        bundle.putString("hrToken", hrToken);
-        intent.putExtras(bundle);
-        context.startActivity(intent);
+    private HRService(Context context) {
+        this.mContext = new WeakReference<>(context);
+    }
+
+    public static HRService from(Context context) {
+        return new HRService(context);
     }
 
     /**
-     * 打开HR界面
+     * 设置HR身份令牌
      *
-     * @param context 上下文
      * @param hrToken hr身份令牌
+     * @return HRService
      */
-    public static void openHR(Context context, String hrToken) {
+    public HRService setHrToken(String hrToken) {
+        this.hrToken = hrToken;
+        return this;
+    }
+
+    /**
+     * 设置水印文字
+     *
+     * @param watermarkStr 设置水印文字
+     * @return HRService
+     */
+    public HRService setWatermarkStr(String watermarkStr) {
+        this.watermarkStr = watermarkStr;
+        return this;
+    }
+
+    /**
+     * 是否开启测试服务
+     *
+     * @param isTestService
+     * @return HRServic
+     */
+    public HRService setTestService(boolean isTestService) {
+        this.isTestService = isTestService;
+        return this;
+    }
+
+    /**
+     * 开启HR界面
+     */
+    public void startHR() {
         Intent intent = new Intent();
-        intent.setClass(context.getApplicationContext(), HRActivity.class);
         Bundle bundle = new Bundle();
         bundle.putString("hrToken", hrToken);
+        bundle.putString("watermarkStr", watermarkStr);
+        bundle.putBoolean("isTestService", isTestService);
         intent.putExtras(bundle);
-        context.startActivity(intent);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        Context packageContext = mContext.get();
+        intent.setClass(packageContext, HRActivity.class);
+        packageContext.startActivity(intent);
     }
 
 }

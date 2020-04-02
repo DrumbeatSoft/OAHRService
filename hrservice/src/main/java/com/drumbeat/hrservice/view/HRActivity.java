@@ -9,8 +9,6 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -59,17 +57,18 @@ public class HRActivity extends AppCompatActivity {
     private final static int REQUEST_CODE_FROM_ACTIVITY = 1000;
     public final static int REQUEST_CODE_FROM = 1001;
     private final static int REQUEST_PERMISSION_CODE = 101;
-    //    private final static String BASE_URL = "http://192.168.71.8:8866/";//测试
+    private final static String BASE_URL_TEST = "http://192.168.71.8:8866/";//测试
     //    private final static String BASE_URL_H5 = "http://192.168.70.35:8088/#/attendance-management?hrToken=";//测试 雷鸣
-    //    private final static String BASE_URL_H5 = "http://192.168.70.95:8088/#/attendance-management?hrToken=";//测试 李昂
+    private final static String BASE_URL_H5_TEST = "http://192.168.70.95:8088/#/attendance-management?hrToken=";//测试 李昂
 
-    private final static String BASE_URL_H5 = "http://47.92.181.31:8822/#/attendance-management?hrToken=";//生产
     private final static String BASE_URL = "http://47.92.181.31:8866/"; //生产
+    private final static String BASE_URL_H5 = "http://47.92.181.31:8822/#/attendance-management?hrToken=";//生产
 
     private final static String UPLOAD_CONTENT_FILE = "flowable/contentItem/upLoadContentFile";
     private String callback;
     private int index;
     private String hrToken;
+    private boolean testService;
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override
@@ -87,17 +86,25 @@ public class HRActivity extends AppCompatActivity {
             window.setStatusBarColor(Color.TRANSPARENT);
         }
 
+        Bundle extras = getIntent().getExtras();
+        hrToken = getIntent().getExtras().getString("hrToken");
+        String watermarkStr = extras.getString("watermarkStr");
+        testService = extras.getBoolean("testService");
+
+        LogUtils.debug("Bundle:" + extras.toString());
+
         flContainer = findViewById(R.id.hr_flContainer);
         webView = findViewById(R.id.hr_webView);
-        Watermark.getInstance().show(flContainer, getIntent().getExtras().getString("watermarkStr"));
         customLoading = new CustomLoading(this);
+        Watermark.getInstance().show(flContainer, watermarkStr);
         initWebView();
     }
 
     @SuppressLint("JavascriptInterface")
     private void initWebView() {
-        hrToken = getIntent().getExtras().getString("hrToken");
-        final String URL = BASE_URL_H5 + hrToken;
+
+        final String URL = (testService ? BASE_URL_H5_TEST : BASE_URL_H5) + hrToken;
+
         WebSettings webSettings = webView.getSettings();
         webSettings.setAllowContentAccess(true);
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);     //设置js可以直接打开窗口，如window.open()，默认为false
@@ -130,6 +137,8 @@ public class HRActivity extends AppCompatActivity {
             }
         });
         webView.loadUrl(URL);
+
+        LogUtils.debug(URL);
     }
 
     /**
@@ -189,19 +198,14 @@ public class HRActivity extends AppCompatActivity {
      * @param methodName
      */
     private void loadJsMethod(final String methodName, final String param) {
-        Runnable callbackRunnable = new Runnable() {
+        webView.post(new Runnable() {
             @Override
             public void run() {
                 String jsCode = "javascript:" + methodName + "(" + param + ")";
                 LogUtils.debug("loadJsMethod:" + jsCode);
                 webView.loadUrl(jsCode);
             }
-        };
-        if (Looper.getMainLooper() == Looper.myLooper()) {
-            callbackRunnable.run();
-        } else {
-            new Handler(Looper.getMainLooper()).post(callbackRunnable);
-        }
+        });
     }
 
     @Override
@@ -271,7 +275,8 @@ public class HRActivity extends AppCompatActivity {
                     .ignoreBy(100)
                     .setTargetDir(HRActivity.this.getApplication().getCacheDir().getAbsolutePath())
                     .get();
-            Kalle.post(BASE_URL + UPLOAD_CONTENT_FILE)
+            String url = testService ? BASE_URL_TEST : BASE_URL;
+            Kalle.post(url + UPLOAD_CONTENT_FILE)
                     .addHeader("Authorization", "Bearer " + hrToken)
                     .files("files", fileList)
                     .converter(new JsonConverter())

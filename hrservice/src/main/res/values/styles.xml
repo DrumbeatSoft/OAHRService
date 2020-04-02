@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <style name="hr_AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    </style>
+
     <style name="hr_LoadingDialog" parent="android:style/Theme.Dialog">
         <item name="android:windowFrame">@null</item>
         <item name="android:windowNoTitle">true</item>

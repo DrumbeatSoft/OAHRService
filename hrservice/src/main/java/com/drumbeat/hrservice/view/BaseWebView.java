@@ -141,8 +141,8 @@ public class BaseWebView extends WebView {
             @Override
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
                 LogUtils.debug("onReceivedError:" + error.getDescription().toString());
-//                isError = true;
-//                isSuccess = false;
+                isError = true;
+                isSuccess = false;
             }
         });
 
