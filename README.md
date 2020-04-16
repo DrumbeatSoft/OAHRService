@@ -6,7 +6,7 @@
 
 ### 引入
 
-implementation 'com.github.githubAtom:OAHRService:1.1.3'
+implementation 'com.github.githubAtom:OAHRService:1.1.2'
 
 
 ### 调用HR界面
