@@ -58,11 +58,12 @@ public class HRActivity extends AppCompatActivity {
     public final static int REQUEST_CODE_FROM = 1001;
     private final static int REQUEST_PERMISSION_CODE = 101;
     private final static String BASE_URL_TEST = "http://192.168.71.8:8866/";//测试
-    //    private final static String BASE_URL_H5 = "http://192.168.70.35:8088/#/attendance-management?hrToken=";//测试 雷鸣
-    private final static String BASE_URL_H5_TEST = "http://192.168.70.95:8088/#/attendance-management?hrToken=";//测试 李昂
+    //    private final static String BASE_URL_H5 = "http://192.168.70.35:8088/#/attendance-management";//测试 雷鸣
+//    private final static String BASE_URL_H5_TEST = "http://192.168.70.95:8088/#/attendance-management";//测试 李阳
+    private final static String BASE_URL_H5_TEST = "http://192.168.70.187:8088/#/attendance-management";//测试 高博
 
     private final static String BASE_URL = "http://47.92.181.31:8866/"; //生产
-    private final static String BASE_URL_H5 = "http://47.92.181.31:8822/#/attendance-management?hrToken=";//生产
+    private final static String BASE_URL_H5 = "http://47.92.181.31:8822/#/attendance-management";//生产
 
     private final static String UPLOAD_CONTENT_FILE = "flowable/contentItem/upLoadContentFile";
     private String callback;
@@ -79,7 +80,7 @@ public class HRActivity extends AppCompatActivity {
 
         Window window = getWindow();
         View decorView = window.getDecorView();
-        int option = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
+        int option = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
         decorView.setSystemUiVisibility(option);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
@@ -89,7 +90,7 @@ public class HRActivity extends AppCompatActivity {
         Bundle extras = getIntent().getExtras();
         hrToken = getIntent().getExtras().getString("hrToken");
         String watermarkStr = extras.getString("watermarkStr");
-        testService = extras.getBoolean("testService");
+        testService = extras.getBoolean("isTestService");
 
         LogUtils.debug("Bundle:" + extras.toString());
 
@@ -103,7 +104,7 @@ public class HRActivity extends AppCompatActivity {
     @SuppressLint("JavascriptInterface")
     private void initWebView() {
 
-        final String URL = (testService ? BASE_URL_H5_TEST : BASE_URL_H5) + hrToken;
+        final String URL = testService ? BASE_URL_H5_TEST : BASE_URL_H5;
 
         WebSettings webSettings = webView.getSettings();
         webSettings.setAllowContentAccess(true);
@@ -402,6 +403,16 @@ public class HRActivity extends AppCompatActivity {
     @JavascriptInterface
     public void navBack() {
         finish();
+    }
+
+    /**
+     * H5获取HR token
+     *
+     * @return
+     */
+    @JavascriptInterface
+    public String getHrToken() {
+        return hrToken;
     }
 
     /**
