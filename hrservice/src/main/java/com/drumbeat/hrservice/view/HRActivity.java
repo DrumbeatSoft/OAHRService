@@ -9,7 +9,6 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Looper;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -379,27 +378,28 @@ public class HRActivity extends AppCompatActivity {
         this.callback = callback;
         this.index = index;
 
-        EasyPhotos.createAlbum(HRActivity.this, true, ImageEngineForEasyPhotos.getInstance())
-                .setFileProviderAuthority(HRActivity.this.getApplication().getPackageName() + ".hrservice.fileProvider")
-                .setCount(count)
-                .setGif(false)//是否显示Gif图，默认不显示
-                .setVideo(false)//是否显示视频，默认不显示
-                .setPuzzleMenu(false)//是否显示拼图按钮，默认显示
-                .setCleanMenu(true)//是否显示清空按钮，默认显示
-                .start(new SelectCallback() {
-                    @Override
-                    public void onResult(ArrayList<Photo> photos, boolean isOriginal) {
-                        //上传图片
-                        if (photos != null && photos.size() > 0) {
-                            ArrayList<String> paths = new ArrayList<>();
-                            for (Photo photo : photos) {
-                                paths.add(photo.path);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                EasyPhotos.createAlbum(HRActivity.this, true, ImageEngineForEasyPhotos.getInstance())
+                        .setFileProviderAuthority(HRActivity.this.getApplication().getPackageName() + ".hrservice.fileProvider")
+                        .setCount(count)
+                        .setGif(false)//是否显示Gif图，默认不显示
+                        .setVideo(false)//是否显示视频，默认不显示
+                        .setPuzzleMenu(false)//是否显示拼图按钮，默认显示
+                        .setCleanMenu(true)//是否显示清空按钮，默认显示
+                        .start(new SelectCallback() {
+                            @Override
+                            public void onResult(ArrayList<Photo> photos, ArrayList<String> paths, boolean isOriginal) {
+                                //上传图片
+                                if (paths != null && paths.size() > 0) {
+                                    uploadImg(paths);
+                                }
                             }
-                            uploadImg(paths);
-                        }
-                    }
-                });
+                        });
 
+            }
+        });
     }
 
     /**
