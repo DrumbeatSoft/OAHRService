@@ -2,6 +2,7 @@ package com.drumbeat.hrservice.util;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
@@ -44,7 +45,7 @@ public class ImageEngineForEasyPhotos implements ImageEngine {
      * @param imageView 加载到的ImageView
      */
     @Override
-    public void loadPhoto(Context context, String photoPath, ImageView imageView) {
+    public void loadPhoto(Context context, Uri photoPath, ImageView imageView) {
         Glide.with(context).load(photoPath).transition(withCrossFade()).into(imageView);
     }
 
@@ -58,7 +59,7 @@ public class ImageEngineForEasyPhotos implements ImageEngine {
      *                  备注：不支持动图显示的情况下可以不写
      */
     @Override
-    public void loadGifAsBitmap(Context context, String gifPath, ImageView imageView) {
+    public void loadGifAsBitmap(Context context, Uri gifPath, ImageView imageView) {
         Glide.with(context).asBitmap().load(gifPath).into(imageView);
     }
 
@@ -72,7 +73,7 @@ public class ImageEngineForEasyPhotos implements ImageEngine {
      *                  备注：不支持动图显示的情况下可以不写
      */
     @Override
-    public void loadGif(Context context, String gifPath, ImageView imageView) {
+    public void loadGif(Context context, Uri gifPath, ImageView imageView) {
         Glide.with(context).asGif().load(gifPath).transition(withCrossFade()).into(imageView);
     }
 
@@ -88,9 +89,8 @@ public class ImageEngineForEasyPhotos implements ImageEngine {
      * @throws Exception 异常直接抛出，EasyPhotos内部处理
      */
     @Override
-    public Bitmap getCacheBitmap(Context context, String path, int width, int height) throws Exception {
+    public Bitmap getCacheBitmap(Context context, Uri path, int width, int height) throws Exception {
         return Glide.with(context).asBitmap().load(path).submit(width, height).get();
     }
-
 
 }

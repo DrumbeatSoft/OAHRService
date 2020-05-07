@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.drumbeat.hrservice.HRService;
 
 public class MainActivity extends AppCompatActivity {
-    String token = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzY29wZSI6WyJhcHAiXSwibmFtZSI6IuadjueRnuiKsyIsImVtcGxveWVlSWQiOiJjZDEzZWE0NS1iNGExLTRlOWItODI2Ny1lMTNlMDI4Y2I5NDAiLCJleHAiOjE1ODgxNDU2MjQsInVzZXJJZCI6IjM0NDIwYzY2LWZkNTEtNDI5Zi04NzQxLWNmYjk0MDk1YTFhZSIsImp0aSI6IjVhYzIzOWRkLTlkNmItNDczZS05NWNhLWUyOTAzZGU1ODkxZCIsImNsaWVudF9pZCI6Ik9hQXBwIiwidXNlcm5hbWUiOiJ6enoxMjYifQ.bI8ooe-JOhxvmNrY6k7baFFHoOOjPTvWmdz6br1uIGQAse9HzslZ_-K4zT1155lFEjrLMGCVqr6a8fx8-SuleAOgF-U03bS1NjoYxi3MSeShH9wBoRlSM0JWVpE0vJSnMIyxBLliXcPZOirs4AqvaStmsqb92JUE3FbpZS_wgjZPtOjxwSLn65GICUtY5ffFp95AjAZGGkBhOXymaark4ZAbnctrGQ--6V5FDMVtlvlRjYYYN-FUzACKyWWt4O0AVhr4Qp-eXocAKtQxuTDEjSZ68yhENA2JJboBPeVOId5ai_52OjVone4gS1-WaSclYhqgdHVwKdNEfqzVsr_90A";
+    String token = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzY29wZSI6WyJhcHAiXSwibmFtZSI6IumfqemdmeS8miIsImVtcGxveWVlSWQiOiI5Y2Q4YmY2Ny0yNjA3LTQ3MWQtODdmYy0xMGE5OTg2NGZlOTUiLCJleHAiOjE1ODkzNjAxOTYsInVzZXJJZCI6IjE5YmExYjNiLTdmNmEtNDk3Zi05NWRkLTRkZGZlZmJiMDE4NSIsImp0aSI6ImZkN2EyMzNmLTg0MTYtNDBmZS04NDVlLWNhNzg3OTExZDczZiIsImNsaWVudF9pZCI6Ik9hQXBwIiwidXNlcm5hbWUiOiJhYmF1MDMifQ.sxhH9cENDhkm8camQZo-AebcaScKtvHFUM8SXqekSlhAaE0WtmHsvgwMOVViQvP6u_YCg9d2PEP001Gppkss0XKFX8Ly6BL_8x8zzeuKSxFzEAp7srJmNeo5j301Th2srUdBbH3K-fijlPQvraidGn2EXrbtf_YzOqeMJjdszObqVsjp4IB4UVFTLIkgrR4hxN7wg8TbUJMJre7QnCPYk32v23n4zh5OBsn7TzFs-8mq5f6O9ibbXgBnVNQsMNiwtzhSnAdLcc_WmoIRobypT2rBifnYs0Tb7GvbGZs60l47G_0rV80oJHFl6cUpFHutQ3zOxjOE28uhzLI4eIYE6g";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
                         //设置水印文字 非必要参数
                         .setWatermarkStr("")
                         //切换为测试环境 配合调试 默认为不开启
-                        .setTestService(true)
+//                        .setTestService(true)
                         .startHR();
 
             }

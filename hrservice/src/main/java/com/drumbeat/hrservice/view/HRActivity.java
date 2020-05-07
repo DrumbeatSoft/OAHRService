@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Looper;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -115,7 +116,7 @@ public class HRActivity extends AppCompatActivity {
         webSettings.setBuiltInZoomControls(false);   //是否显示缩放按钮，默认false
         webSettings.setUseWideViewPort(true);       //设置此属性，可任意比例缩放。大视图模式
         webSettings.setLoadWithOverviewMode(true);  //和setUseWideViewPort(true)一起解决网页自适应问题
-        webSettings.setAppCacheEnabled(true);       //是否使用缓存
+        webSettings.setAppCacheEnabled(false);       //是否使用缓存
         webSettings.setDomStorageEnabled(true);     //DOM Storage
 
         webView.addJavascriptInterface(HRActivity.this, "androidOA");
@@ -378,8 +379,8 @@ public class HRActivity extends AppCompatActivity {
         this.callback = callback;
         this.index = index;
 
-        EasyPhotos.createAlbum(this, true, ImageEngineForEasyPhotos.getInstance())
-                .setFileProviderAuthority(this.getApplication().getPackageName() + ".hrservice.fileProvider")
+        EasyPhotos.createAlbum(HRActivity.this, true, ImageEngineForEasyPhotos.getInstance())
+                .setFileProviderAuthority(HRActivity.this.getApplication().getPackageName() + ".hrservice.fileProvider")
                 .setCount(count)
                 .setGif(false)//是否显示Gif图，默认不显示
                 .setVideo(false)//是否显示视频，默认不显示
@@ -387,9 +388,13 @@ public class HRActivity extends AppCompatActivity {
                 .setCleanMenu(true)//是否显示清空按钮，默认显示
                 .start(new SelectCallback() {
                     @Override
-                    public void onResult(ArrayList<Photo> photos, ArrayList<String> paths, boolean isOriginal) {
+                    public void onResult(ArrayList<Photo> photos, boolean isOriginal) {
                         //上传图片
-                        if (paths != null && paths.size() > 0) {
+                        if (photos != null && photos.size() > 0) {
+                            ArrayList<String> paths = new ArrayList<>();
+                            for (Photo photo : photos) {
+                                paths.add(photo.path);
+                            }
                             uploadImg(paths);
                         }
                     }
