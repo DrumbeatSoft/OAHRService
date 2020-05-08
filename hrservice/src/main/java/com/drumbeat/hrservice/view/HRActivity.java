@@ -9,7 +9,6 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Looper;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -58,19 +57,13 @@ public class HRActivity extends AppCompatActivity {
     private final static int REQUEST_CODE_FROM_ACTIVITY = 1000;
     public final static int REQUEST_CODE_FROM = 1001;
     private final static int REQUEST_PERMISSION_CODE = 101;
-    private final static String BASE_URL_TEST = "http://192.168.71.8:8866/";//测试
-    //    private final static String BASE_URL_H5 = "http://192.168.70.35:8088/#/attendance-management";//测试 雷鸣
-//    private final static String BASE_URL_H5_TEST = "http://192.168.70.95:8088/#/attendance-management";//测试 李阳
-    private final static String BASE_URL_H5_TEST = "http://192.168.70.187:8088/#/attendance-management";//测试 高博
-
-    private final static String BASE_URL = "http://47.92.181.31:8866/"; //生产
-    private final static String BASE_URL_H5 = "http://47.92.181.31:8822/#/attendance-management";//生产
-
     private final static String UPLOAD_CONTENT_FILE = "flowable/contentItem/upLoadContentFile";
+
     private String callback;
     private int index;
     private String hrToken;
-    private boolean testService;
+    private String baseUrl;
+    private String baseUrlH5;
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override
@@ -89,9 +82,10 @@ public class HRActivity extends AppCompatActivity {
         }
 
         Bundle extras = getIntent().getExtras();
+        baseUrl = getIntent().getExtras().getString("baseUrl");
+        baseUrlH5 = getIntent().getExtras().getString("baseUrlH5");
         hrToken = getIntent().getExtras().getString("hrToken");
         String watermarkStr = extras.getString("watermarkStr");
-        testService = extras.getBoolean("isTestService");
 
         LogUtils.debug("Bundle:" + extras.toString());
 
@@ -104,8 +98,6 @@ public class HRActivity extends AppCompatActivity {
 
     @SuppressLint("JavascriptInterface")
     private void initWebView() {
-
-        final String URL = testService ? BASE_URL_H5_TEST : BASE_URL_H5;
 
         WebSettings webSettings = webView.getSettings();
         webSettings.setAllowContentAccess(true);
@@ -135,12 +127,12 @@ public class HRActivity extends AppCompatActivity {
             @Override
             public void onErrorClick() {
                 showLoading();
-                webView.loadUrl(URL);
+                webView.loadUrl(baseUrlH5);
             }
         });
-        webView.loadUrl(URL);
+        webView.loadUrl(baseUrlH5);
 
-        LogUtils.debug(URL);
+        LogUtils.debug(baseUrlH5);
     }
 
     /**
@@ -277,8 +269,7 @@ public class HRActivity extends AppCompatActivity {
                     .ignoreBy(100)
                     .setTargetDir(HRActivity.this.getApplication().getCacheDir().getAbsolutePath())
                     .get();
-            String url = testService ? BASE_URL_TEST : BASE_URL;
-            Kalle.post(url + UPLOAD_CONTENT_FILE)
+            Kalle.post(baseUrl + UPLOAD_CONTENT_FILE)
                     .addHeader("Authorization", "Bearer " + hrToken)
                     .files("files", fileList)
                     .converter(new JsonConverter())
