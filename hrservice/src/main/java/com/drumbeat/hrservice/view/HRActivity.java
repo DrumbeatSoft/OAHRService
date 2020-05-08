@@ -9,6 +9,8 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -61,6 +63,7 @@ public class HRActivity extends AppCompatActivity {
 
     private String callback;
     private int index;
+    private int count;
     private String hrToken;
     private String baseUrl;
     private String baseUrlH5;
@@ -369,28 +372,9 @@ public class HRActivity extends AppCompatActivity {
     public void selectAlbum(String callback, final int count, int index) {
         this.callback = callback;
         this.index = index;
+        this.count = count;
 
-        EasyPhotos.createAlbum(HRActivity.this, true, ImageEngineForEasyPhotos.getInstance())
-                .setFileProviderAuthority(HRActivity.this.getApplication().getPackageName() + ".hrservice.fileProvider")
-                .setCount(count)
-                .setGif(false)//是否显示Gif图，默认不显示
-                .setVideo(false)//是否显示视频，默认不显示
-                .setPuzzleMenu(false)//是否显示拼图按钮，默认显示
-                .setCleanMenu(true)//是否显示清空按钮，默认显示
-                .start(new SelectCallback() {
-                    @Override
-                    public void onResult(ArrayList<Photo> photos, boolean isOriginal) {
-                        //上传图片
-                        if (photos != null && photos.size() > 0) {
-                            ArrayList<String> paths = new ArrayList<>();
-                            for (Photo photo : photos) {
-                                paths.add(photo.path);
-                            }
-                            uploadImg(paths);
-                        }
-                    }
-                });
-
+        handlerUI.sendEmptyMessage(1);
     }
 
     /**
@@ -421,4 +405,33 @@ public class HRActivity extends AppCompatActivity {
         Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phone));
         startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
+
+    private Handler handlerUI = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message msg) {
+
+            EasyPhotos.createAlbum(HRActivity.this, true, ImageEngineForEasyPhotos.getInstance())
+                    .setFileProviderAuthority(HRActivity.this.getApplication().getPackageName() + ".hrservice.fileProvider")
+                    .setCount(count)
+                    .setGif(false)//是否显示Gif图，默认不显示
+                    .setVideo(false)//是否显示视频，默认不显示
+                    .setPuzzleMenu(false)//是否显示拼图按钮，默认显示
+                    .setCleanMenu(true)//是否显示清空按钮，默认显示
+                    .start(new SelectCallback() {
+                        @Override
+                        public void onResult(ArrayList<Photo> photos, boolean isOriginal) {
+                            //上传图片
+                            if (photos != null && photos.size() > 0) {
+                                ArrayList<String> paths = new ArrayList<>();
+                                for (Photo photo : photos) {
+                                    paths.add(photo.path);
+                                }
+                                uploadImg(paths);
+                            }
+                        }
+                    });
+
+            return false;
+        }
+    });
 }
