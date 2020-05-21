@@ -28,6 +28,7 @@ import androidx.core.app.ActivityCompat;
 import com.drumbeat.hrservice.R;
 import com.drumbeat.hrservice.net.DataObject;
 import com.drumbeat.hrservice.net.JsonConverter;
+import com.drumbeat.hrservice.net.KalleCallback;
 import com.drumbeat.hrservice.util.AndroidBug5497Workaround;
 import com.drumbeat.hrservice.util.ImageEngineForEasyPhotos;
 import com.drumbeat.hrservice.util.LogUtils;
@@ -39,8 +40,6 @@ import com.huantansheng.easyphotos.EasyPhotos;
 import com.huantansheng.easyphotos.callback.SelectCallback;
 import com.huantansheng.easyphotos.models.album.entity.Photo;
 import com.yanzhenjie.kalle.Kalle;
-import com.yanzhenjie.kalle.simple.SimpleCallback;
-import com.yanzhenjie.kalle.simple.SimpleResponse;
 
 import java.io.File;
 import java.io.IOException;
@@ -276,27 +275,27 @@ public class HRActivity extends AppCompatActivity {
                     .addHeader("Authorization", "Bearer " + hrToken)
                     .files("files", fileList)
                     .converter(new JsonConverter())
-                    .perform(new SimpleCallback<DataObject<List<String>>>() {
+                    .perform(new KalleCallback<DataObject<List<String>>>() {
                         @Override
-                        public void onResponse(SimpleResponse<DataObject<List<String>>, String> response) {
+                        protected void onSuccess(DataObject<List<String>> succeed) {
                             hideLoading();
-                            if (response.isSucceed()) {
-                                DataObject<List<String>> succeed = response.succeed();
-                                List<String> fileIdList = succeed.getData();
-                                if (fileIdList != null && fileIdList.size() > 0) {
-                                    StringBuilder fileIdStr = new StringBuilder();
-                                    for (String fileId : fileIdList) {
-                                        fileIdStr.append(fileId).append(",");
-                                    }
-                                    loadJsMethod(callback, "'" + fileIdStr + "'," + index);
-                                } else {
-                                    uplodImgFile();
+                            List<String> fileIdList = succeed.getData();
+                            if (fileIdList != null && fileIdList.size() > 0) {
+                                StringBuilder fileIdStr = new StringBuilder();
+                                for (String fileId : fileIdList) {
+                                    fileIdStr.append(fileId).append(",");
                                 }
+                                loadJsMethod(callback, "'" + fileIdStr + "'," + index);
                             } else {
                                 uplodImgFile();
                             }
                         }
 
+                        @Override
+                        protected void onFailed(String failed) {
+                            hideLoading();
+                            uplodImgFile();
+                        }
                     });
 
         } catch (IOException e) {
