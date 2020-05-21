@@ -20,7 +20,7 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
--keep public class com.drumbeat.hrservice.net.DataObject { *; }
+-keep class com.drumbeat.hrservice.** { *; }
 
 # easyphotos
 -keep class com.huantansheng.easyphotos.models.** { *; }
