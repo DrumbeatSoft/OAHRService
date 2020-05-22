@@ -96,12 +96,14 @@ public class HRActivity extends AppCompatActivity {
         webView = findViewById(R.id.hr_webView);
         customLoading = new CustomLoading(this);
         Watermark.getInstance().show(flContainer, watermarkStr);
+
+        WebViewUtil.clearCache(this);
+
         initWebView();
     }
 
     @SuppressLint("JavascriptInterface")
     private void initWebView() {
-
         WebSettings webSettings = webView.getSettings();
         webSettings.setAllowContentAccess(true);
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);     //设置js可以直接打开窗口，如window.open()，默认为false
@@ -111,8 +113,8 @@ public class HRActivity extends AppCompatActivity {
         webSettings.setBuiltInZoomControls(false);   //是否显示缩放按钮，默认false
         webSettings.setUseWideViewPort(true);       //设置此属性，可任意比例缩放。大视图模式
         webSettings.setLoadWithOverviewMode(true);  //和setUseWideViewPort(true)一起解决网页自适应问题
-
-//        WebViewUtil.clearCache(this);
+        webSettings.setAppCacheEnabled(true);       //是否使用缓存
+        webSettings.setDomStorageEnabled(true);     //DOM Storage
 
         webView.addJavascriptInterface(HRActivity.this, "androidOA");
 
@@ -133,6 +135,7 @@ public class HRActivity extends AppCompatActivity {
                 webView.loadUrl(baseUrlH5);
             }
         });
+
         webView.loadUrl(baseUrlH5);
 
         LogUtils.debug(baseUrlH5);
