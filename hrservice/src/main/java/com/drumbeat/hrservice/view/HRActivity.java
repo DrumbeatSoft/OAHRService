@@ -33,6 +33,7 @@ import com.drumbeat.hrservice.util.AndroidBug5497Workaround;
 import com.drumbeat.hrservice.util.ImageEngineForEasyPhotos;
 import com.drumbeat.hrservice.util.LogUtils;
 import com.drumbeat.hrservice.util.Watermark;
+import com.drumbeat.hrservice.util.WebViewUtil;
 import com.ess.filepicker.FilePicker;
 import com.ess.filepicker.model.EssFile;
 import com.ess.filepicker.util.Const;
@@ -110,8 +111,8 @@ public class HRActivity extends AppCompatActivity {
         webSettings.setBuiltInZoomControls(false);   //是否显示缩放按钮，默认false
         webSettings.setUseWideViewPort(true);       //设置此属性，可任意比例缩放。大视图模式
         webSettings.setLoadWithOverviewMode(true);  //和setUseWideViewPort(true)一起解决网页自适应问题
-        webSettings.setAppCacheEnabled(false);       //是否使用缓存
-        webSettings.setDomStorageEnabled(true);     //DOM Storage
+
+//        WebViewUtil.clearCache(this);
 
         webView.addJavascriptInterface(HRActivity.this, "androidOA");
 
