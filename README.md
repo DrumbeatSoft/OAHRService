@@ -6,7 +6,7 @@
 
 ### 引入
 
-implementation 'com.github.DrumbeatSoft:OAHRService:1.1.7'
+implementation 'com.github.DrumbeatSoft:OAHRService:1.1.8'
 
 
 ### 调用HR界面
