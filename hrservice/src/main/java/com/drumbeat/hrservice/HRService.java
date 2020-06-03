@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.drumbeat.hrservice.view.HRActivity;
+import com.tencent.smtt.sdk.QbSdk;
 
 import java.lang.ref.WeakReference;
 
@@ -23,6 +24,8 @@ public class HRService {
     }
 
     public static HRService from(Context context) {
+        //x5内核初始化接口
+        QbSdk.initX5Environment(context, null);
         return new HRService(context);
     }
 

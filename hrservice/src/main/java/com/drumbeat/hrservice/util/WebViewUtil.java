@@ -2,9 +2,9 @@ package com.drumbeat.hrservice.util;
 
 import android.content.Context;
 import android.os.Build;
-import android.webkit.CookieManager;
-import android.webkit.CookieSyncManager;
-import android.webkit.WebView;
+import com.tencent.smtt.sdk.CookieManager;
+import com.tencent.smtt.sdk.CookieSyncManager;
+import com.tencent.smtt.sdk.WebView;
 
 import java.io.File;
 

@@ -3,29 +3,26 @@ package com.drumbeat.hrservice.view;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.net.http.SslError;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.SslErrorHandler;
-import android.webkit.WebChromeClient;
-import android.webkit.WebResourceError;
-import android.webkit.WebResourceRequest;
-import android.webkit.WebResourceResponse;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 
-import com.drumbeat.hrservice.util.LogUtils;
 import com.drumbeat.hrservice.R;
+import com.drumbeat.hrservice.util.LogUtils;
+import com.tencent.smtt.export.external.interfaces.SslError;
+import com.tencent.smtt.export.external.interfaces.SslErrorHandler;
+import com.tencent.smtt.export.external.interfaces.WebResourceRequest;
+import com.tencent.smtt.export.external.interfaces.WebResourceResponse;
+import com.tencent.smtt.sdk.WebChromeClient;
+import com.tencent.smtt.sdk.WebView;
+import com.tencent.smtt.sdk.WebViewClient;
 
 /**
  * 带进度条的WebView
@@ -45,26 +42,12 @@ public class BaseWebView extends WebView {
     }
 
     @SuppressLint("SetJavaScriptEnabled")
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public BaseWebView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         final LinearLayout errorLayout = getErrorLayout(context);
         addView(errorLayout);
 
-        /**
-         *  Webview在安卓5.0之前默认允许其加载混合网络协议内容
-         *  在安卓5.0之后，默认不允许加载http与https混合内容，需要设置webview允许其加载混合网络协议内容
-         */
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            getSettings().setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
-
-        }
-
-        /** 设置webView不显示图片问题 */
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-            getSettings().setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
-        }
         getSettings().setJavaScriptEnabled(true);
         getSettings().setBlockNetworkImage(false);
 
@@ -105,11 +88,6 @@ public class BaseWebView extends WebView {
             }
 
             @Override
-            public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-                handler.proceed(); // 接受所有网站的证书
-            }
-
-            @Override
             public void onPageFinished(WebView view, String url) {
                 if (mWebViewListener != null) {
                     mWebViewListener.onPageFinished(view, url);
@@ -127,9 +105,16 @@ public class BaseWebView extends WebView {
             }
 
             @Override
-            public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
-                super.onReceivedHttpError(view, request, errorResponse);
-                int statusCode = errorResponse.getStatusCode();
+            public void onReceivedError(WebView webView, int i, String s, String s1) {
+                super.onReceivedError(webView, i, s, s1);
+                isError = true;
+                isSuccess = false;
+            }
+
+            @Override
+            public void onReceivedHttpError(WebView webView, WebResourceRequest webResourceRequest, WebResourceResponse webResourceResponse) {
+                super.onReceivedHttpError(webView, webResourceRequest, webResourceResponse);
+                int statusCode = webResourceResponse.getStatusCode();
                 LogUtils.debug("onReceivedHttpError:" + statusCode);
                 if (404 == statusCode || 500 == statusCode) {
                     isError = true;
@@ -137,15 +122,13 @@ public class BaseWebView extends WebView {
                 }
             }
 
-            @RequiresApi(api = Build.VERSION_CODES.M)
             @Override
-            public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
-                LogUtils.debug("onReceivedError:" + error.getDescription().toString());
+            public void onReceivedSslError(WebView webView, SslErrorHandler sslErrorHandler, SslError sslError) {
+                super.onReceivedSslError(webView, sslErrorHandler, sslError);
                 isError = true;
                 isSuccess = false;
             }
         });
-
     }
 
     private LinearLayout getErrorLayout(Context context) {

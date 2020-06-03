@@ -15,8 +15,8 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
+import com.tencent.smtt.sdk.WebSettings;
+import com.tencent.smtt.sdk.WebView;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
@@ -29,7 +29,6 @@ import com.drumbeat.hrservice.R;
 import com.drumbeat.hrservice.net.DataObject;
 import com.drumbeat.hrservice.net.JsonConverter;
 import com.drumbeat.hrservice.net.KalleCallback;
-import com.drumbeat.hrservice.util.AndroidBug5497Workaround;
 import com.drumbeat.hrservice.util.ImageEngineForEasyPhotos;
 import com.drumbeat.hrservice.util.LogUtils;
 import com.drumbeat.hrservice.util.Watermark;
@@ -73,7 +72,6 @@ public class HRActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.hr_activity_hr);
-        AndroidBug5497Workaround.assistActivity(this);
 
         Window window = getWindow();
         View decorView = window.getDecorView();

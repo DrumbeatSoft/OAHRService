@@ -22,6 +22,9 @@
 
 -keep class com.drumbeat.hrservice.** { *; }
 
+# tbs
+-keep class com.tencent.** { *; }
+
 # easyphotos
 -keep class com.huantansheng.easyphotos.models.** { *; }
 
