@@ -3,9 +3,14 @@ package com.drumbeat.hrservice;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 
+import com.drumbeat.hrservice.net.DataObject;
+import com.drumbeat.hrservice.net.JsonConverter;
+import com.drumbeat.hrservice.net.KalleCallback;
 import com.drumbeat.hrservice.view.HRActivity;
 import com.tencent.smtt.sdk.QbSdk;
+import com.yanzhenjie.kalle.Kalle;
 
 import java.lang.ref.WeakReference;
 
@@ -18,6 +23,8 @@ public class HRService {
     private String watermarkStr;
     private String baseUrl;
     private String baseUrlH5;
+    private TodoCountListener todoCountListener;
+    private final static String GET_TODO_COUNT = "flowable/TaskProcess/getCountMyToDo";
 
     private HRService(Context context) {
         this.mContext = new WeakReference<>(context);
@@ -79,6 +86,50 @@ public class HRService {
         Context packageContext = mContext.get();
         intent.setClass(packageContext, HRActivity.class);
         packageContext.startActivity(intent);
+    }
+
+    /**
+     * 获取办事项数量，需要设置baseURL、HRtoken
+     *
+     * @param listener
+     */
+    public void getTodoCount(TodoCountListener listener) {
+        this.todoCountListener = listener;
+        if (listener != null) {
+            if (TextUtils.isEmpty(hrToken) && TextUtils.isEmpty(baseUrl) && TextUtils.isEmpty(baseUrlH5)) {
+                throw new UnsupportedOperationException("请检查hrToken、baseUrl、baseUrlH5");
+            }
+            requestTodoCount();
+        }
+    }
+
+    /**
+     * 请求代办事项数量
+     */
+    private void requestTodoCount() {
+        Kalle.get(baseUrl + GET_TODO_COUNT)
+                .addHeader("Authorization", "Bearer " + hrToken)
+                .converter(new JsonConverter())
+                .perform(new KalleCallback<DataObject<Integer>>() {
+                    @Override
+                    protected void onSuccess(DataObject<Integer> succeed) {
+                        todoCountListener.getTodoCount(succeed.getData());
+                    }
+
+                    @Override
+                    protected void onFailed(String failed) {
+                        todoCountListener.onFailed(failed);
+                    }
+                });
+    }
+
+    /**
+     * 获取代办事件数量的接口
+     */
+    public interface TodoCountListener {
+        void getTodoCount(int todoCount);
+
+        void onFailed(String failed);
     }
 
 }
