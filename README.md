@@ -25,16 +25,16 @@ implementation 'com.github.DrumbeatSoft:OAHRService:1.1.12'
                    
                    //获取代办事项数量
                    hrService.getTodoCount(new HRService.TodoCountListener() {
-                    @Override
-                    public void getTodoCount(int todoCount) {
-                      
-                    }
+                        @Override
+                        public void getTodoCount(int todoCount) {
 
-                    @Override
-                    public void onFailed(String failed) {
+                        }
 
-                    }
-                });
+                        @Override
+                        public void onFailed(String failed) {
+
+                        }
+                    });
     
 
     
