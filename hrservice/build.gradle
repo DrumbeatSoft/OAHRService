@@ -38,4 +38,5 @@ dependencies {
     implementation 'top.zibin:Luban:1.1.8'
     implementation 'com.github.githubAtom:filepicker:1.0.3'
     implementation 'com.yanzhenjie:kalle:0.1.7'
+    implementation 'com.tencent.tbs.tbssdk:sdk:43903'
 }
