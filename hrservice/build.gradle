@@ -4,7 +4,7 @@ android {
     compileSdkVersion 29
 
     defaultConfig {
-        minSdkVersion 15
+        minSdkVersion 19
         targetSdkVersion 29
         versionCode 118
         versionName "1.1.8"
@@ -39,4 +39,5 @@ dependencies {
     implementation 'com.github.githubAtom:filepicker:1.0.3'
     implementation 'com.yanzhenjie:kalle:0.1.7'
     implementation 'com.tencent.tbs.tbssdk:sdk:43903'
+    implementation 'com.github.DrumbeatSoft:ZFace:1.1.6'
 }

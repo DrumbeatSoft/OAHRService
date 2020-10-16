@@ -12,8 +12,15 @@
         <activity
             android:name="com.drumbeat.hrservice.view.HRActivity"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateHidden|adjustResize"
-            android:theme="@style/hr_AppTheme" />
+            android:theme="@style/hr_AppTheme"
+            android:windowSoftInputMode="stateHidden|adjustResize" />
+
+        <activity
+            android:name=".view.FaceRecognitionActivity"
+            android:hardwareAccelerated="true"
+            android:screenOrientation="portrait"
+            android:theme="@style/hr_AppTheme"
+            android:windowSoftInputMode="stateHidden|adjustResize" />
 
         <provider
             android:name=".util.HRFileProvider"

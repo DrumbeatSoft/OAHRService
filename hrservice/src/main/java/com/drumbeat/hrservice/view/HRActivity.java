@@ -9,14 +9,22 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.text.TextUtils;
+import android.util.Base64;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
+
+import com.drumbeat.hrservice.util.GZIPCompressUtils;
+import com.drumbeat.zface.util.PathUtils;
+import com.huantansheng.easyphotos.utils.bitmap.BitmapUtils;
 import com.tencent.smtt.sdk.WebSettings;
 import com.tencent.smtt.sdk.WebView;
+
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
@@ -42,6 +50,8 @@ import com.huantansheng.easyphotos.models.album.entity.Photo;
 import com.yanzhenjie.kalle.Kalle;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,6 +68,7 @@ public class HRActivity extends AppCompatActivity {
     private final static int REQUEST_CODE_FROM_ACTIVITY = 1000;
     public final static int REQUEST_CODE_FROM = 1001;
     private final static int REQUEST_PERMISSION_CODE = 101;
+    private final static int REQUEST_FACE_CODE = 1002;
     private final static String UPLOAD_CONTENT_FILE = "flowable/contentItem/upLoadContentFile";
 
     private String callback;
@@ -66,6 +77,8 @@ public class HRActivity extends AppCompatActivity {
     private String hrToken;
     private String baseUrl;
     private String baseUrlH5;
+    private String initZFaceResult;//人脸初始化结果
+    private float[] faceFeatureData;//人脸特征值
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override
@@ -86,6 +99,7 @@ public class HRActivity extends AppCompatActivity {
         baseUrl = getIntent().getExtras().getString("baseUrl");
         baseUrlH5 = getIntent().getExtras().getString("baseUrlH5");
         hrToken = getIntent().getExtras().getString("hrToken");
+        initZFaceResult = getIntent().getExtras().getString("initZFaceResult");
         String watermarkStr = extras.getString("watermarkStr");
 
         LogUtils.debug("Bundle:" + extras.toString());
@@ -245,6 +259,13 @@ public class HRActivity extends AppCompatActivity {
                     }
                     UploadMessageFiles(list);
                     showToastLong("选中了" + list.size() + "个文件" + essFileList.toString());
+                }
+                break;
+
+            case REQUEST_FACE_CODE:
+                if (data != null) {
+                    faceFeatureData = data.getFloatArrayExtra("faceFeatureData");
+                    sendFaceDataToH5();
                 }
                 break;
 
@@ -435,4 +456,74 @@ public class HRActivity extends AppCompatActivity {
             return false;
         }
     });
+
+    /**
+     * H5点击调用android识别
+     *
+     * @return
+     */
+    @JavascriptInterface
+    public void faceRecognition() {
+        Intent intent = new Intent();
+        intent.setClass(HRActivity.this, FaceRecognitionActivity.class);
+        intent.putExtra("initZFaceResult", initZFaceResult);
+        startActivityForResult(intent, REQUEST_FACE_CODE);
+    }
+
+
+    private void sendFaceDataToH5() {
+        String faceData = floatArray2String(faceFeatureData);
+        File faceFile = new File(PathUtils.getExternalAppDataPath(HRActivity.this), "/face.jpg");
+        String faceFileBase64 = file2Base64(faceFile);
+        if (TextUtils.isEmpty(faceData) || TextUtils.isEmpty(faceFileBase64)) {
+            showToastLong("照片获取失败，请重新识别");
+        } else {
+            loadJsMethod("androidFaceData", "'" + faceData + "'");
+            loadJsMethod("androidFaceBase64", "'" + faceFileBase64 + "'");
+        }
+
+
+    }
+
+    /**
+     * file转base64 获取人脸图片文件的base64
+     */
+    private String file2Base64(File file) {
+        if (file == null) {
+            return null;
+        }
+        String base64 = null;
+        FileInputStream fin = null;
+        try {
+            fin = new FileInputStream(file);
+            byte[] buff = new byte[fin.available()];
+            fin.read(buff);
+            base64 = Base64.encodeToString(buff, Base64.NO_WRAP);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (fin != null) {
+                try {
+                    fin.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return base64;
+    }
+
+    /**
+     * float数组转string
+     */
+    private String floatArray2String(float[] floats) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < floats.length; i++) {
+            stringBuilder.append(floats[i] + ",");
+        }
+        return GZIPCompressUtils.compress(stringBuilder.toString());//压缩
+
+    }
 }
