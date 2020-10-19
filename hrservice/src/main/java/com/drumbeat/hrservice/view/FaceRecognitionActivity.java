@@ -91,7 +91,11 @@ public class FaceRecognitionActivity extends AppCompatActivity {
             //将Base64编码字符串解码成Bitmap
             byte[] decodedString = Base64.decode(oldHeader.split(",")[1], Base64.NO_WRAP);
             Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-            iv_face.setImageBitmap(decodedByte);
+            Glide.with(FaceRecognitionActivity.this)
+                    .asBitmap()
+                    .load(decodedByte)
+                    .transform(new CenterCrop(), new RoundedCorners(8))
+                    .into(iv_face);
         }
         iv_back.setOnClickListener(new View.OnClickListener() {
             @Override
