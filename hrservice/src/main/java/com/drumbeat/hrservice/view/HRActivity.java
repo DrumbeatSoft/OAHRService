@@ -463,10 +463,11 @@ public class HRActivity extends AppCompatActivity {
      * @return
      */
     @JavascriptInterface
-    public void faceRecognition() {
+    public void faceRecognition(String imgBase64) {
         Intent intent = new Intent();
         intent.setClass(HRActivity.this, FaceRecognitionActivity.class);
         intent.putExtra("initZFaceResult", initZFaceResult);
+        intent.putExtra("oldHeader", imgBase64);
         startActivityForResult(intent, REQUEST_FACE_CODE);
     }
 

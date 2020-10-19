@@ -12,6 +12,7 @@ import android.graphics.YuvImage;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -57,7 +58,8 @@ public class FaceRecognitionActivity extends AppCompatActivity {
     private Button btn_confirm;
     private Button btn_start_recognize;
     private float[] featureDataRegister;
-    private String initZFaceResult;
+    private String oldHeader;//原先的头像
+    private String initZFaceResult;//初始化的异常原因
     private Bitmap faceBitmap;
 
     @Override
@@ -74,6 +76,7 @@ public class FaceRecognitionActivity extends AppCompatActivity {
         }
 
         Bundle extras = getIntent().getExtras();
+        oldHeader = extras.getString("oldHeader");
         initZFaceResult = extras.getString("initZFaceResult");
         initView();
     }
@@ -84,6 +87,12 @@ public class FaceRecognitionActivity extends AppCompatActivity {
         iv_back = findViewById(R.id.iv_back);
         btn_start_recognize = findViewById(R.id.btn_start_recognize);
         btn_confirm = findViewById(R.id.btn_confirm);
+        if (!TextUtils.isEmpty(oldHeader)) {
+            //将Base64编码字符串解码成Bitmap
+            byte[] decodedString = Base64.decode(oldHeader.split(",")[1], Base64.NO_WRAP);
+            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+            iv_face.setImageBitmap(decodedByte);
+        }
         iv_back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

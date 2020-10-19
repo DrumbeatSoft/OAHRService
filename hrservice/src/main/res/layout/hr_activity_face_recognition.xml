@@ -42,8 +42,8 @@
         android:id="@+id/camera_preview"
         android:layout_width="140dp"
         android:layout_height="140dp"
-        android:layout_centerHorizontal="true"
         android:layout_below="@id/title_bar"
+        android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp"
         android:src="@mipmap/hr_header_default" />
 
@@ -84,7 +84,8 @@
             android:id="@+id/iv_face"
             android:layout_width="140dp"
             android:layout_height="140dp"
-            android:layout_centerInParent="true" />
+            android:layout_centerInParent="true"
+            android:scaleType="centerCrop" />
     </RelativeLayout>
 
     <ImageView
