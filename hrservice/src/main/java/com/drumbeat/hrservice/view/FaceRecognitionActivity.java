@@ -27,10 +27,12 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.drumbeat.hrservice.R;
+import com.drumbeat.hrservice.util.LogUtils;
 import com.drumbeat.zface.ZFace;
 import com.drumbeat.zface.config.CameraConfig;
 import com.drumbeat.zface.constant.ErrorCode;
 import com.drumbeat.zface.listener.DownloadListener;
+import com.drumbeat.zface.listener.InitListener;
 import com.drumbeat.zface.listener.QueryListener;
 import com.drumbeat.zface.listener.RecognizeListener;
 import com.drumbeat.zface.util.Logger;
@@ -105,8 +107,34 @@ public class FaceRecognitionActivity extends AppCompatActivity {
             }
         });
         if (TextUtils.equals(initZFaceResult, ErrorCode.ERROR_NO_RESOURCE.toString())) {
-            initZFace();
+            downloadRecourseTip();
         }
+        /**
+         *  如果资源已被其他项目下载，使用当中的项目没有提前获取权限，就提示获取权限
+         * */
+        if (TextUtils.equals(initZFaceResult, ErrorCode.ERROR_LOAD_RESOURCE_FAIL.toString())) {
+            queryResource();
+        }
+    }
+
+    /**
+     * 资源部存在提示下载资源
+     */
+    private void downloadRecourseTip() {
+        new AlertDialog.Builder(this).setMessage("识别功能需要下载资源包,请等待下载完成")
+                .setPositiveButton("同意", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        downLoadResource();
+                    }
+                })
+                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        finish();
+                    }
+                }).create().show();
+
     }
 
     /**
@@ -119,20 +147,29 @@ public class FaceRecognitionActivity extends AppCompatActivity {
             public void onSuccess(boolean needDownload) {
                 if (needDownload) {
                     hideLoading();
-                    ZFace.with(FaceRecognitionActivity.this).resource().download(new DownloadListener() {
-                        @Override
-                        public void onSuccess() {
-                            showToastShort("资源文件下载成功,点击开始按钮识别");
-                        }
-
-                        @Override
-                        public void onFailure(ErrorCode errorCode, String errorMsg) {
-                            showToastShort("资源文件下载失败，错误码：" + errorCode);
-                        }
-                    });
+                    downLoadResource();
                 } else {
                     hideLoading();
+                    initZFace();
                 }
+            }
+        });
+    }
+
+    /**
+     * 下载资源
+     */
+    private void downLoadResource() {
+        ZFace.with(FaceRecognitionActivity.this).resource().download(new DownloadListener() {
+            @Override
+            public void onSuccess() {
+                initZFace();
+                showToastShort("资源文件下载成功,点击开始按钮识别");
+            }
+
+            @Override
+            public void onFailure(ErrorCode errorCode, String errorMsg) {
+                showToastShort("资源文件下载失败，错误码：" + errorCode);
             }
         });
     }
@@ -141,21 +178,20 @@ public class FaceRecognitionActivity extends AppCompatActivity {
      * 初始化zface
      */
     public void initZFace() {
-        new AlertDialog.Builder(this).setMessage("识别功能需要下载资源包,请等待下载完成")
-                .setPositiveButton("同意", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        queryResource();
-                    }
-                })
-                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        finish();
-                    }
-                }).create().show();
+        ZFace.with(FaceRecognitionActivity.this).recognizer().init(new InitListener() {
+            @Override
+            public void onSuccess() {
+                LogUtils.debug("初始化成功");
+            }
+
+            @Override
+            public void onFailure(ErrorCode errorCode, String errorMsg) {
+                LogUtils.debug("初始化失败，错误码：" + errorCode);
+            }
+        });
 
     }
+
 
     /**
      * 开始识别

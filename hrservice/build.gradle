@@ -6,8 +6,8 @@ android {
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 1113
-        versionName "1.1.13"
+        versionCode 1114
+        versionName "1.1.14"
         consumerProguardFiles 'proguard-rules.pro'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -39,5 +39,5 @@ dependencies {
     implementation 'com.github.githubAtom:filepicker:1.0.3'
     implementation 'com.yanzhenjie:kalle:0.1.7'
     implementation 'com.tencent.tbs.tbssdk:sdk:43903'
-    implementation 'com.github.DrumbeatSoft:ZFace:1.1.6'
+    api 'com.github.DrumbeatSoft:ZFace:1.1.6'
 }
