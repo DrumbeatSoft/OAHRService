@@ -265,6 +265,7 @@ public class HRActivity extends AppCompatActivity {
             case REQUEST_FACE_CODE:
                 if (data != null) {
                     faceFeatureData = data.getFloatArrayExtra("faceFeatureData");
+                    initZFaceResult = "";//已经初始化成功
                     sendFaceDataToH5();
                 }
                 break;

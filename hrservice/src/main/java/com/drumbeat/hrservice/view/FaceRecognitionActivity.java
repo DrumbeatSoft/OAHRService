@@ -83,6 +83,7 @@ public class FaceRecognitionActivity extends AppCompatActivity {
 
     private void initView() {
         customLoading = new CustomLoading(this);
+        customLoading.setCancelable(true);
         iv_face = findViewById(R.id.iv_face);
         iv_back = findViewById(R.id.iv_back);
         btn_start_recognize = findViewById(R.id.btn_start_recognize);
@@ -112,22 +113,22 @@ public class FaceRecognitionActivity extends AppCompatActivity {
         btn_confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                saveBitmapFile();
-                Intent intent = new Intent();
-                intent.putExtra("faceFeatureData", featureDataRegister);
-                setResult(RESULT_OK, intent);
+                if (featureDataRegister != null && featureDataRegister.length != 0) {
+                    saveBitmapFile();
+                    Intent intent = new Intent();
+                    intent.putExtra("faceFeatureData", featureDataRegister);
+                    setResult(RESULT_OK, intent);
+                }
                 finish();
             }
         });
-        if (TextUtils.equals(initZFaceResult, ErrorCode.ERROR_NO_RESOURCE.toString())) {
-            downloadRecourseTip();
-        }
         /**
-         *  如果资源已被其他项目下载，使用当中的项目没有提前获取权限，就提示获取权限
+         *  如果初始化失败，可能是资源已被其他项目下载但没有权限，或者文件缺失，所以先检查
          * */
-        if (TextUtils.equals(initZFaceResult, ErrorCode.ERROR_LOAD_RESOURCE_FAIL.toString())) {
+        if (!TextUtils.isEmpty(initZFaceResult)) {
             queryResource();
         }
+
     }
 
     /**
@@ -155,12 +156,12 @@ public class FaceRecognitionActivity extends AppCompatActivity {
      */
     public void queryResource() {
         showLoading();
-        ZFace.with(this).resource().query(new QueryListener() {
+        ZFace.with(FaceRecognitionActivity.this).resource().query(new QueryListener() {
             @Override
             public void onSuccess(boolean needDownload) {
                 if (needDownload) {
                     hideLoading();
-                    downLoadResource();
+                    downloadRecourseTip();
                 } else {
                     hideLoading();
                     initZFace();
