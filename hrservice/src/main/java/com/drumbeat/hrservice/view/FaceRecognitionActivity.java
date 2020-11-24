@@ -31,6 +31,7 @@ import com.drumbeat.hrservice.R;
 import com.drumbeat.hrservice.util.LogUtils;
 import com.drumbeat.zface.ZFace;
 import com.drumbeat.zface.config.CameraConfig;
+import com.drumbeat.zface.config.ZFaceConfig;
 import com.drumbeat.zface.constant.ErrorCode;
 import com.drumbeat.zface.listener.DownloadListener;
 import com.drumbeat.zface.listener.InitListener;
@@ -58,8 +59,6 @@ public class FaceRecognitionActivity extends AppCompatActivity {
     private Button btn_confirm;
     private Button btn_start_recognize;
     private float[] featureDataRegister;
-    private String oldHeader;//原先的头像
-    private String initZFaceResult;//初始化的异常原因
     private Bitmap faceBitmap;
 
     @Override
@@ -75,9 +74,7 @@ public class FaceRecognitionActivity extends AppCompatActivity {
             window.setStatusBarColor(Color.TRANSPARENT);
         }
 
-        Bundle extras = getIntent().getExtras();
-        oldHeader = extras.getString("oldHeader");
-        initZFaceResult = extras.getString("initZFaceResult");
+        initZFaceConfig();
         initView();
     }
 
@@ -88,6 +85,9 @@ public class FaceRecognitionActivity extends AppCompatActivity {
         iv_back = findViewById(R.id.iv_back);
         btn_start_recognize = findViewById(R.id.btn_start_recognize);
         btn_confirm = findViewById(R.id.btn_confirm);
+
+        Bundle extras = getIntent().getExtras();
+        String oldHeader = extras.getString("oldHeader");
         if (!TextUtils.isEmpty(oldHeader)) {
             //将Base64编码字符串解码成Bitmap
             byte[] decodedString = Base64.decode(oldHeader.split(",")[1], Base64.NO_WRAP);
@@ -98,6 +98,7 @@ public class FaceRecognitionActivity extends AppCompatActivity {
                     .transform(new CenterCrop(), new RoundedCorners(8))
                     .into(iv_face);
         }
+
         iv_back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -122,13 +123,35 @@ public class FaceRecognitionActivity extends AppCompatActivity {
                 finish();
             }
         });
-        /**
-         *  如果初始化失败，可能是资源已被其他项目下载但没有权限，或者文件缺失，所以先检查
-         * */
-        if (!TextUtils.isEmpty(initZFaceResult)) {
-            queryResource();
-        }
 
+        queryResource();
+
+    }
+
+    private void initZFaceConfig() {
+        ZFace.setConfig(ZFaceConfig.newBuilder()
+                .setResource_model_download_base_url("https://drumbeat-update-app.oss-cn-hangzhou.aliyuncs.com/face/model") // model文件baseurl
+                .setResource_so_download_base_url("https://drumbeat-update-app.oss-cn-hangzhou.aliyuncs.com/face/so") // so文件baseurl
+                .build());
+    }
+
+    /**
+     * 查询是否需要下载资源文件
+     */
+    public void queryResource() {
+        showLoading();
+        ZFace.with(FaceRecognitionActivity.this).resource().query(new QueryListener() {
+            @Override
+            public void onSuccess(boolean needDownload) {
+                if (needDownload) {
+                    hideLoading();
+                    downloadRecourseTip();
+                } else {
+                    initZFace();
+                    hideLoading();
+                }
+            }
+        });
     }
 
     /**
@@ -149,25 +172,6 @@ public class FaceRecognitionActivity extends AppCompatActivity {
                     }
                 }).create().show();
 
-    }
-
-    /**
-     * 查询是否需要下载资源文件
-     */
-    public void queryResource() {
-        showLoading();
-        ZFace.with(FaceRecognitionActivity.this).resource().query(new QueryListener() {
-            @Override
-            public void onSuccess(boolean needDownload) {
-                if (needDownload) {
-                    hideLoading();
-                    downloadRecourseTip();
-                } else {
-                    hideLoading();
-                    initZFace();
-                }
-            }
-        });
     }
 
     /**
@@ -219,7 +223,7 @@ public class FaceRecognitionActivity extends AppCompatActivity {
                         if (featureData != null && featureData.length > 0) {
                             featureDataRegister = new float[featureData.length];
                             System.arraycopy(featureData, 0, featureDataRegister, 0, featureData.length);
-                            showToastShort("人脸识别完成，已取得人脸特征数据");
+                            showToastShort("识别成功");
                             Logger.i("人脸识别完成，已取得人脸特征数据");
 
                             faceBitmap = convertBitmap(270, bytes2Bitmap(faceData));
@@ -234,7 +238,7 @@ public class FaceRecognitionActivity extends AppCompatActivity {
 
                     @Override
                     public void onFailure(ErrorCode errorCode, String errorMsg) {
-                        showToastShort("人脸识别失败，错误码：" + errorCode);
+                        showToastShort("识别失败，错误码：" + errorCode);
                     }
                 });
     }

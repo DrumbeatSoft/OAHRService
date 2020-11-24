@@ -8,12 +8,7 @@ import android.text.TextUtils;
 import com.drumbeat.hrservice.net.DataObject;
 import com.drumbeat.hrservice.net.JsonConverter;
 import com.drumbeat.hrservice.net.KalleCallback;
-import com.drumbeat.hrservice.util.LogUtils;
 import com.drumbeat.hrservice.view.HRActivity;
-import com.drumbeat.zface.ZFace;
-import com.drumbeat.zface.config.ZFaceConfig;
-import com.drumbeat.zface.constant.ErrorCode;
-import com.drumbeat.zface.listener.InitListener;
 import com.tencent.smtt.sdk.QbSdk;
 import com.yanzhenjie.kalle.Kalle;
 
@@ -30,7 +25,6 @@ public class HRService {
     private String baseUrlH5;
     private TodoCountListener todoCountListener;
     private final static String GET_TODO_COUNT = "flowable/TaskProcess/getCountMyToDo";
-    private static String initZFaceResult;
 
     private HRService(Context context) {
         this.mContext = new WeakReference<>(context);
@@ -39,8 +33,6 @@ public class HRService {
     public static HRService from(Context context) {
         //x5内核初始化接口
         QbSdk.initX5Environment(context, null);
-        //人脸识别初始化
-        initZFace(context);
         return new HRService(context);
     }
 
@@ -89,7 +81,6 @@ public class HRService {
         bundle.putString("baseUrlH5", baseUrlH5);
         bundle.putString("hrToken", hrToken);
         bundle.putString("watermarkStr", watermarkStr);
-        bundle.putString("initZFaceResult", initZFaceResult);
         intent.putExtras(bundle);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         Context packageContext = mContext.get();
@@ -142,25 +133,4 @@ public class HRService {
         void onFailed(String failed);
     }
 
-    /**
-     * 初始化zface
-     */
-    public static void initZFace(Context context) {
-        ZFace.setConfig(ZFaceConfig.newBuilder()
-                .setResource_model_download_base_url("https://drumbeat-update-app.oss-cn-hangzhou.aliyuncs.com/face/model") // model文件baseurl
-                .setResource_so_download_base_url("https://drumbeat-update-app.oss-cn-hangzhou.aliyuncs.com/face/so") // so文件baseurl
-                .build());
-        ZFace.with(context).recognizer().init(new InitListener() {
-            @Override
-            public void onSuccess() {
-                LogUtils.debug("初始化成功");
-            }
-
-            @Override
-            public void onFailure(ErrorCode errorCode, String errorMsg) {
-                LogUtils.debug("初始化失败，错误码：" + errorCode);
-                initZFaceResult = errorCode.name();
-            }
-        });
-    }
 }
