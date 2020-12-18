@@ -28,22 +28,19 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import com.drumbeat.hrservice.R;
-import com.drumbeat.hrservice.bean.FileBean;
 import com.drumbeat.hrservice.net.DataObject;
 import com.drumbeat.hrservice.net.JsonConverter;
 import com.drumbeat.hrservice.net.KalleCallback;
 import com.drumbeat.hrservice.util.GZIPCompressUtils;
-import com.drumbeat.hrservice.util.ImageEngineForEasyPhotos;
 import com.drumbeat.hrservice.util.LogUtils;
+import com.drumbeat.hrservice.util.PictureHelper;
 import com.drumbeat.hrservice.util.Watermark;
 import com.drumbeat.hrservice.util.WebViewUtil;
 import com.drumbeat.zface.util.PathUtils;
 import com.ess.filepicker.FilePicker;
 import com.ess.filepicker.model.EssFile;
 import com.ess.filepicker.util.Const;
-import com.huantansheng.easyphotos.EasyPhotos;
-import com.huantansheng.easyphotos.callback.SelectCallback;
-import com.huantansheng.easyphotos.models.album.entity.Photo;
+import com.luck.picture.lib.entity.LocalMedia;
 import com.tencent.smtt.sdk.QbSdk;
 import com.tencent.smtt.sdk.ValueCallback;
 import com.tencent.smtt.sdk.WebSettings;
@@ -76,8 +73,9 @@ public class HRActivity extends AppCompatActivity {
     private final static int REQUEST_PERMISSION_FILE_PICK_CODE = 101;
     private final static int REQUEST_PERMISSION_FILE_DOWNLOAD_CODE = 102;
     private final static int REQUEST_FACE_CODE = 1002;
-    private final static String UPLOAD_CONTENT_FILE = "flowable/contentItem/upLoadContentFile";
-    private final static String UPLOAD_PDF_FILE = "organization/file/uploadFiles";
+
+    private String UPLOAD_IMAGE_FILE = "flowable/contentItem/upLoadContentFile";
+    private String UPLOAD_PDF_FILE = "organization/file/uploadFiles";
 
     private String callback;
     private int index;
@@ -196,10 +194,29 @@ public class HRActivity extends AppCompatActivity {
     }
 
     /**
-     * H5选择pdf
+     * H5返回上一页
      */
     @JavascriptInterface
-    public void TuneUpPdf(int count) {
+    public void navBack() {
+        finish();
+    }
+
+    /**
+     * H5获取HR token
+     *
+     * @return
+     */
+    @JavascriptInterface
+    public String getHrToken() {
+        return hrToken;
+    }
+
+    /**
+     * H5选择PDF
+     */
+    @JavascriptInterface
+    public void TuneUpPdf(String interfaceName, int count) {
+        this.UPLOAD_PDF_FILE = TextUtils.isEmpty(interfaceName) ? UPLOAD_PDF_FILE : interfaceName;
         this.count = count;
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -215,6 +232,44 @@ public class HRActivity extends AppCompatActivity {
             }
         }
 
+    }
+
+    /**
+     * H5预览PDF文件
+     */
+    @JavascriptInterface
+    public void showPdfFile(String fileName, String fileUrl) {
+        this.fileName = fileName;
+        this.fileUrl = fileUrl;
+        requestPermission();
+    }
+
+    /**
+     * H5选择图片
+     *
+     * @param callback
+     * @param count
+     * @param index
+     */
+    @JavascriptInterface
+    public void selectAlbum(String interfaceName, String callback, final int count, int index) {
+        this.UPLOAD_IMAGE_FILE = TextUtils.isEmpty(interfaceName) ? UPLOAD_IMAGE_FILE : interfaceName;
+        this.callback = callback;
+        this.index = index;
+        this.count = count;
+
+        handlerUI.sendEmptyMessage(1);
+    }
+
+    /**
+     * H5打电话
+     *
+     * @param phone 手机号码
+     */
+    @JavascriptInterface
+    public void ringUp(String phone) {
+        Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phone));
+        startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
 
     /**
@@ -302,21 +357,12 @@ public class HRActivity extends AppCompatActivity {
                 .addHeader("Authorization", "Bearer " + hrToken)
                 .files("files", fileList)
                 .converter(new JsonConverter())
-                .perform(new KalleCallback<DataObject<List<FileBean>>>() {
+                .perform(new KalleCallback<DataObject<String>>() {
                     @Override
-                    protected void onSuccess(DataObject<List<FileBean>> succeed) {
+                    protected void onSuccess(DataObject<String> succeed) {
                         hideLoading();
-                        List<FileBean> fileIdList = succeed.getData();
-                        if (fileIdList != null && fileIdList.size() > 0) {
-                            StringBuilder fileIdStr = new StringBuilder();
-                            StringBuilder fileUrlStr = new StringBuilder();
-                            StringBuilder fileNameStr = new StringBuilder();
-                            for (FileBean fileBean : fileIdList) {
-                                fileIdStr.append(fileBean.getId()).append(",");
-                                fileUrlStr.append(fileBean.getFileUrl()).append(",");
-                                fileNameStr.append(fileBean.getFilename()).append(",");
-                            }
-                            loadJsMethod("getPDF", "'" + fileIdStr + "','" + fileUrlStr + "','" + fileNameStr + "'");
+                        if (!TextUtils.isEmpty(succeed.getData())) {
+                            loadJsMethod("getPDF", "'" + succeed.getData() + "'");
                         } else {
                             uploadFileFailed();
                         }
@@ -343,7 +389,7 @@ public class HRActivity extends AppCompatActivity {
                     .ignoreBy(100)
                     .setTargetDir(HRActivity.this.getApplication().getCacheDir().getAbsolutePath())
                     .get();
-            Kalle.post(baseUrl + UPLOAD_CONTENT_FILE)
+            Kalle.post(baseUrl + UPLOAD_IMAGE_FILE)
                     .addHeader("Authorization", "Bearer " + hrToken)
                     .files("files", fileList)
                     .converter(new JsonConverter())
@@ -418,90 +464,31 @@ public class HRActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * 预览PDF文件
-     */
-    @JavascriptInterface
-    public void showPdfFile(String fileName, String fileUrl) {
-        this.fileName = fileName;
-        this.fileUrl = fileUrl;
-        requestPermission();
-    }
-
-    /**
-     * 从相册中选择图片
-     *
-     * @param callback
-     * @param count
-     * @param index
-     */
-    @JavascriptInterface
-    public void selectAlbum(String callback, final int count, int index) {
-        this.callback = callback;
-        this.index = index;
-        this.count = count;
-
-        handlerUI.sendEmptyMessage(1);
-    }
-
-    /**
-     * 返回上一页
-     */
-    @JavascriptInterface
-    public void navBack() {
-        finish();
-    }
-
-    /**
-     * H5获取HR token
-     *
-     * @return
-     */
-    @JavascriptInterface
-    public String getHrToken() {
-        return hrToken;
-    }
-
-    /**
-     * 打电话
-     *
-     * @param phone 手机号码
-     */
-    @JavascriptInterface
-    public void ringUp(String phone) {
-        Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phone));
-        startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-    }
 
     private Handler handlerUI = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
             if (msg.what == 1) {
-                EasyPhotos.createAlbum(HRActivity.this, true, ImageEngineForEasyPhotos.getInstance())
-                        .setFileProviderAuthority(HRActivity.this.getApplication().getPackageName() + ".hrservice.fileProvider")
-                        .setCount(count)
-                        .setGif(false)//是否显示Gif图，默认不显示
-                        .setVideo(false)//是否显示视频，默认不显示
-                        .setPuzzleMenu(false)//是否显示拼图按钮，默认显示
-                        .setCleanMenu(true)//是否显示清空按钮，默认显示
-                        .start(new SelectCallback() {
-                            @Override
-                            public void onResult(ArrayList<Photo> photos, boolean isOriginal) {
-                                //上传图片
-                                if (photos != null && photos.size() > 0) {
-                                    ArrayList<String> paths = new ArrayList<>();
-                                    for (Photo photo : photos) {
-                                        paths.add(photo.path);
-                                    }
-                                    uploadImg(paths);
-                                }
+                PictureHelper.selectAlbum(HRActivity.this, count, null, new PictureHelper.OnSelectListener() {
+                    @Override
+                    public void selected(List<LocalMedia> data) {
+                        //上传图片
+                        if (data != null && data.size() > 0) {
+                            ArrayList<String> paths = new ArrayList<>();
+                            for (LocalMedia photo : data) {
+                                paths.add(photo.getRealPath());
                             }
-                        });
+                            uploadImg(paths);
+                        }
+                    }
+                });
             }
 
             return false;
         }
     });
+
+    //*****************************人脸识别
 
     /**
      * H5点击调用android识别
@@ -575,7 +562,7 @@ public class HRActivity extends AppCompatActivity {
 
     }
 
-
+    //*****************************预览pdf
     /**
      * PDF预览
      */

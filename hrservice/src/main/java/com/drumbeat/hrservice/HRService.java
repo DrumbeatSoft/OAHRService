@@ -4,15 +4,26 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.widget.Toast;
 
 import com.drumbeat.hrservice.net.DataObject;
 import com.drumbeat.hrservice.net.JsonConverter;
 import com.drumbeat.hrservice.net.KalleCallback;
+import com.drumbeat.hrservice.util.LogUtils;
 import com.drumbeat.hrservice.view.HRActivity;
+import com.drumbeat.zface.ZFace;
+import com.drumbeat.zface.config.ZFaceConfig;
+import com.drumbeat.zface.constant.ErrorCode;
+import com.drumbeat.zface.listener.Action;
+import com.drumbeat.zface.listener.CompareListener;
+import com.drumbeat.zface.listener.InitListener;
+import com.drumbeat.zface.listener.RecognizeListener;
+import com.drumbeat.zface.permission.Permission;
 import com.tencent.smtt.sdk.QbSdk;
 import com.yanzhenjie.kalle.Kalle;
 
 import java.lang.ref.WeakReference;
+import java.util.List;
 
 /**
  * 提供OA HR 服务
@@ -26,8 +37,12 @@ public class HRService {
     private TodoCountListener todoCountListener;
     private final static String GET_TODO_COUNT = "flowable/TaskProcess/getCountMyToDo";
 
+    public static boolean zfaceInitSuccess;
+
     private HRService(Context context) {
         this.mContext = new WeakReference<>(context);
+        initZFaceConfig(context);
+
     }
 
     public static HRService from(Context context) {
@@ -133,4 +148,94 @@ public class HRService {
         void onFailed(String failed);
     }
 
+    /**
+     * zface配置资源路径
+     *
+     * @param context
+     */
+    private void initZFaceConfig(Context context) {
+        ZFace.setConfig(ZFaceConfig.newBuilder()
+                .setResource_model_download_base_url("https://drumbeat-update-app.oss-cn-hangzhou.aliyuncs.com/face/model") // model文件baseurl
+                .setResource_so_download_base_url("https://drumbeat-update-app.oss-cn-hangzhou.aliyuncs.com/face/so") // so文件baseurl
+                .build());
+        initZFace(context);
+    }
+
+    /**
+     * 初始化zface
+     */
+    private void initZFace(Context context) {
+        ZFace.with(context).recognizer().init(new InitListener() {
+            @Override
+            public void onSuccess() {
+                zfaceInitSuccess = true;
+                LogUtils.debug("初始化成功");
+            }
+
+            @Override
+            public void onFailure(ErrorCode errorCode, String errorMsg) {
+                zfaceInitSuccess = false;
+                LogUtils.debug("初始化失败，错误码：" + errorCode);
+            }
+        });
+
+    }
+
+    /**
+     * 人脸比对
+     *
+     * @param context
+     * @param featureDataRegister
+     */
+    public void compareFace(final Context context, final float[] featureDataRegister, final OnCompareFaceListener onCompareFaceListener) {
+        if (zfaceInitSuccess) {
+            ZFace.with(context)
+                    .recognizer()
+                    .recognize(new RecognizeListener() {
+                        @Override
+                        public void onSuccess(float[] featureData, byte[] imgData) {
+                            if (featureData != null && featureData.length > 0) {
+                                compareFaceData(context, featureDataRegister, featureData, onCompareFaceListener);
+                            } else {
+                                Toast.makeText(context, "未检测到人脸特征数据", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(ErrorCode errorCode, String errorMsg) {
+                            LogUtils.debug("识别失败，错误码：" + errorCode);
+                            Toast.makeText(context, "识别失败，请重试", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        } else {
+            initZFace(context);
+        }
+
+    }
+
+    private void compareFaceData(final Context context, float[] data1, float[] data2, final OnCompareFaceListener onCompareFaceListener) {
+        ZFace.with(context).recognizer().compare(data1, data2, new CompareListener() {
+            @Override
+            public void onSuccess(float faceSimilar) {
+                if (faceSimilar > 0.7) {
+//                    Toast.makeText(context, "比对成功", Toast.LENGTH_SHORT).show();
+                    onCompareFaceListener.onCompareSuccess();
+                } else {
+                    Toast.makeText(context, "比对失败，请重试", Toast.LENGTH_SHORT).show();
+                    LogUtils.debug("compareFaceData 比对失败，相似度：" + faceSimilar);
+                }
+            }
+
+            @Override
+            public void onFailure(ErrorCode errorCode, String errorMsg) {
+                LogUtils.debug("compareFaceData 比对失败，错误码：" + errorCode);
+                Toast.makeText(context, "比对失败，请重试", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public interface OnCompareFaceListener {
+
+        void onCompareSuccess();
+    }
 }

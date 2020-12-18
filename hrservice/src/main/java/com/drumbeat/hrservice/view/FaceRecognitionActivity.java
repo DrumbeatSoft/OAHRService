@@ -27,6 +27,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
+import com.drumbeat.hrservice.HRService;
 import com.drumbeat.hrservice.R;
 import com.drumbeat.hrservice.util.LogUtils;
 import com.drumbeat.zface.ZFace;
@@ -74,12 +75,11 @@ public class FaceRecognitionActivity extends AppCompatActivity {
             window.setStatusBarColor(Color.TRANSPARENT);
         }
 
-        initZFaceConfig();
         initView();
     }
 
     private void initView() {
-        customLoading = new CustomLoading(this);
+        customLoading = new CustomLoading(FaceRecognitionActivity.this);
         customLoading.setCancelable(true);
         iv_face = findViewById(R.id.iv_face);
         iv_back = findViewById(R.id.iv_back);
@@ -123,16 +123,10 @@ public class FaceRecognitionActivity extends AppCompatActivity {
                 finish();
             }
         });
+        if (!HRService.zfaceInitSuccess) {
+            queryResource();
+        }
 
-        queryResource();
-
-    }
-
-    private void initZFaceConfig() {
-        ZFace.setConfig(ZFaceConfig.newBuilder()
-                .setResource_model_download_base_url("https://drumbeat-update-app.oss-cn-hangzhou.aliyuncs.com/face/model") // model文件baseurl
-                .setResource_so_download_base_url("https://drumbeat-update-app.oss-cn-hangzhou.aliyuncs.com/face/so") // so文件baseurl
-                .build());
     }
 
     /**
@@ -158,7 +152,7 @@ public class FaceRecognitionActivity extends AppCompatActivity {
      * 资源部存在提示下载资源
      */
     private void downloadRecourseTip() {
-        new AlertDialog.Builder(this).setMessage("识别功能需要下载资源包,请等待下载完成")
+        new AlertDialog.Builder(FaceRecognitionActivity.this).setMessage("识别功能需要下载资源包,请等待下载完成")
                 .setPositiveButton("同意", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -215,7 +209,7 @@ public class FaceRecognitionActivity extends AppCompatActivity {
      * 开始识别
      */
     public void register() {
-        ZFace.with(this)
+        ZFace.with(FaceRecognitionActivity.this)
                 .recognizer()
                 .recognize(new RecognizeListener() {
                     @Override
