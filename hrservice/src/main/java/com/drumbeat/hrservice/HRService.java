@@ -197,14 +197,15 @@ public class HRService {
                             if (featureData != null && featureData.length > 0) {
                                 compareFaceData(context, featureDataRegister, featureData, onCompareFaceListener);
                             } else {
-                                Toast.makeText(context, "未检测到人脸特征数据", Toast.LENGTH_SHORT).show();
+                                onCompareFaceListener.onCompareFailed("未检测到人脸特征数据");
+                                LogUtils.debug("未检测到人脸特征数据");
                             }
                         }
 
                         @Override
                         public void onFailure(ErrorCode errorCode, String errorMsg) {
                             LogUtils.debug("识别失败，错误码：" + errorCode);
-                            Toast.makeText(context, "识别失败，请重试", Toast.LENGTH_SHORT).show();
+                            onCompareFaceListener.onCompareFailed("识别失败，请重试");
                         }
                     });
         } else {
@@ -218,10 +219,9 @@ public class HRService {
             @Override
             public void onSuccess(float faceSimilar) {
                 if (faceSimilar > 0.7) {
-//                    Toast.makeText(context, "比对成功", Toast.LENGTH_SHORT).show();
                     onCompareFaceListener.onCompareSuccess();
                 } else {
-                    Toast.makeText(context, "比对失败，请重试", Toast.LENGTH_SHORT).show();
+                    onCompareFaceListener.onCompareFailed("比对失败，请重试");
                     LogUtils.debug("compareFaceData 比对失败，相似度：" + faceSimilar);
                 }
             }
@@ -229,7 +229,7 @@ public class HRService {
             @Override
             public void onFailure(ErrorCode errorCode, String errorMsg) {
                 LogUtils.debug("compareFaceData 比对失败，错误码：" + errorCode);
-                Toast.makeText(context, "比对失败，请重试", Toast.LENGTH_SHORT).show();
+                onCompareFaceListener.onCompareFailed("比对失败，请重试");
             }
         });
     }
@@ -237,5 +237,7 @@ public class HRService {
     public interface OnCompareFaceListener {
 
         void onCompareSuccess();
+
+        void onCompareFailed(String errorMsg);
     }
 }
