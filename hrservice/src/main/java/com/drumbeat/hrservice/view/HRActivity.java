@@ -215,8 +215,30 @@ public class HRActivity extends AppCompatActivity {
      * H5选择PDF
      */
     @JavascriptInterface
+    public void TuneUpPdf(int count) {
+        this.count = count;
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, PERMISSIONS_STORAGE, REQUEST_PERMISSION_FILE_PICK_CODE);
+            } else {
+                FilePicker
+                        .from(HRActivity.this)
+                        .chooseForMimeType()
+                        .setMaxCount(count)
+                        .setFileTypes("pdf")
+                        .requestCode(REQUEST_CODE_FROM_ACTIVITY)
+                        .start();
+            }
+        }
+
+    }
+
+    /**
+     * H5选择PDF
+     */
+    @JavascriptInterface
     public void TuneUpPdf(String interfaceName, int count) {
-        this.UPLOAD_PDF_FILE = TextUtils.isEmpty(interfaceName) ? UPLOAD_PDF_FILE : interfaceName;
+        this.UPLOAD_PDF_FILE = interfaceName;
         this.count = count;
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -252,8 +274,24 @@ public class HRActivity extends AppCompatActivity {
      * @param index
      */
     @JavascriptInterface
+    public void selectAlbum(String callback, final int count, int index) {
+        this.callback = callback;
+        this.index = index;
+        this.count = count;
+
+        handlerUI.sendEmptyMessage(1);
+    }
+
+    /**
+     * H5选择图片
+     *
+     * @param callback
+     * @param count
+     * @param index
+     */
+    @JavascriptInterface
     public void selectAlbum(String interfaceName, String callback, final int count, int index) {
-        this.UPLOAD_IMAGE_FILE = TextUtils.isEmpty(interfaceName) ? UPLOAD_IMAGE_FILE : interfaceName;
+        this.UPLOAD_IMAGE_FILE = interfaceName;
         this.callback = callback;
         this.index = index;
         this.count = count;
@@ -474,10 +512,19 @@ public class HRActivity extends AppCompatActivity {
                     public void selected(List<LocalMedia> data) {
                         //上传图片
                         if (data != null && data.size() > 0) {
+
                             ArrayList<String> paths = new ArrayList<>();
-                            for (LocalMedia photo : data) {
-                                paths.add(photo.getRealPath());
+                            //安卓9以上该框架为兼容path返回的是uri，取realpath，9以下取path
+                            if (android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+                                for (LocalMedia localMedia : data) {
+                                    paths.add(localMedia.getRealPath());
+                                }
+                            } else {
+                                for (LocalMedia localMedia : data) {
+                                    paths.add(localMedia.getPath());
+                                }
                             }
+
                             uploadImg(paths);
                         }
                     }
