@@ -8,18 +8,14 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.drumbeat.hrservice.HRService;
 import com.drumbeat.hrservice.util.GZIPCompressUtils;
-import com.drumbeat.zface.listener.Action;
-import com.drumbeat.zface.permission.Permission;
-
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    //        private final static String BASE_URL = "http://47.92.181.31:8866/"; //生产
-    private final static String BASE_URL = "http://192.168.70.50:8866/"; //测试
-    //        private final static String BASE_URL_H5 = "http://47.92.181.31:8822/#/attendance-management";//生产
+//            private final static String BASE_URL = "http://47.92.181.31:8866/"; //生产
+    private final static String BASE_URL = "http://192.168.71.8:8866/"; //测试
+//            private final static String BASE_URL_H5 = "http://47.92.181.31:8822/#/attendance-management";//生产
     private final static String BASE_URL_H5 = "http://192.168.70.35:8088/#/attendance-management";//测试
-    private final static String token = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzY29wZSI6WyJhcHAiXSwibmFtZSI6IuadjueRnuiKsyIsImVtcGxveWVlSWQiOiJjZDEzZWE0NS1iNGExLTRlOWItODI2Ny1lMTNlMDI4Y2I5NDAiLCJleHAiOjE2MDg4NTg1NjIsInVzZXJJZCI6IjM0NDIwYzY2LWZkNTEtNDI5Zi04NzQxLWNmYjk0MDk1YTFhZSIsImp0aSI6Ijg5MjM4NmM4LWQ1OWYtNDFhMC05MjQzLTA2YTQxNTg4OGY1MiIsImNsaWVudF9pZCI6Ik9hQXBwIiwidXNlcm5hbWUiOiJ6enoxMjYifQ.OFqvIdTx0Gx3IHoJA5nQt2f0JWAvvT66tHpjbRXpvDjwfFU8-Xnb7QtEYuV5QY5grofmOE2cVFGJbzNK1kJlqCnD_C90AGYeITA4myJI58Jnz3tgZeiYJmnOQVfVHlS6I5lSFgRHEu1bYK3EpMCj95giqJ5Aa3BksiP3-LNgWgnDTWefBzWQO0gji_l_gJnVfHInuVkPo8bSw2NMaZ5EBKdAN81wNxyjnRGtD1_DsTfj961ibzr-bLbCQQKVK_XAwljdRaivdsTjryjYFpVYUD4rNlUq2JIhdOgrQ9Yss2uttPd1hJPjpufEJr9MBaQbEIYXyCuyDQ8AA-YgXekLaw";//测试
+    private final static String token = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzY29wZSI6WyJhcHAiXSwibmFtZSI6IuadjueRnuiKsyIsImVtcGxveWVlSWQiOiJjZDEzZWE0NS1iNGExLTRlOWItODI2Ny1lMTNlMDI4Y2I5NDAiLCJleHAiOjE2MTA1MTc2OTYsInVzZXJJZCI6IjM0NDIwYzY2LWZkNTEtNDI5Zi04NzQxLWNmYjk0MDk1YTFhZSIsImp0aSI6ImNlODQwNTI2LTBmZDktNDQwYy05YjEzLTc3ZjM4OWJmM2EzOCIsImNsaWVudF9pZCI6Ik9hQXBwIiwidXNlcm5hbWUiOiJ6enoxMjYifQ.tbvp63nKT842yzCAhO1dTMirT-e4HAtEGScVLg6Xx1X5IPt_0EiQx5xeuT5JdpTKh_soBw4TBMBwsfGX9bjNGIyMQ4DcVtbRPG0_Gy5PxGZpxA2evSRgenksXRcyuPw0XEoLWiIE9UjzxjndbDlUf7vUw-EPQU5XFcpFtAO4siIltMH_nsOiL0iXi4MekGqJ8paUcQekmJZDlvhB-pr4LlCbdTx5vHZCpi_brFf6HbQ8jRWgl0wVpF9oalxP3Afk6pJ0H9kb3Hh-u3r6kLLjRAuCkTZZmixKQhrghbkjdFk15KCqH7hnBEa9mygjyj6_6SNz0MUQeDthGFjRYE4dxA";//测试
 
 
     @Override
@@ -38,9 +34,6 @@ public class MainActivity extends AppCompatActivity {
                         //设置水印文字 非必要参数
                         .setWatermarkStr("")
                         .startHR();
-//                Intent intent = new Intent();
-//                intent.setClass(MainActivity.this,VideoActivity.class);
-//                startActivity(intent);
             }
         });
 
