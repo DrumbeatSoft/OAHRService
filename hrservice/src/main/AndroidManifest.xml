@@ -33,17 +33,6 @@
                 android:resource="@xml/util_code_provider_paths" />
         </provider>
 
-<!--        <provider-->
-<!--            android:name=".util.HRFileProvider"-->
-<!--            android:authorities="${applicationId}.hrservice.fileProvider"-->
-<!--            android:exported="false"-->
-<!--            android:grantUriPermissions="true"-->
-<!--            android:multiprocess="true">-->
-<!--            <meta-data-->
-<!--                android:name="android.support.FILE_PROVIDER_PATHS"-->
-<!--                android:resource="@xml/util_code_provider_paths" />-->
-<!--        </provider>-->
-
     </application>
 
 </manifest>
