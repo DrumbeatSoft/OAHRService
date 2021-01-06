@@ -24,8 +24,8 @@
             android:windowSoftInputMode="stateHidden|adjustResize" />
 
         <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="com.drumbeat.oahrservice.hrservice.fileProvider"
+            android:name=".util.HRFileProvider"
+            android:authorities="${applicationId}.hrservice.fileProvider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
