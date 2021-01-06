@@ -23,26 +23,26 @@
             android:theme="@style/hr_AppTheme"
             android:windowSoftInputMode="stateHidden|adjustResize" />
 
-<!--        <provider-->
-<!--            android:name="androidx.core.content.FileProvider"-->
-<!--            android:authorities="com.drumbeat.oahrservice.hrservice.fileProvider"-->
-<!--            android:exported="false"-->
-<!--            android:grantUriPermissions="true">-->
-<!--            <meta-data-->
-<!--                android:name="android.support.FILE_PROVIDER_PATHS"-->
-<!--                android:resource="@xml/util_code_provider_paths" />-->
-<!--        </provider>-->
-
         <provider
-            android:name=".util.HRFileProvider"
-            android:authorities="${applicationId}.hrservice.fileProvider"
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.drumbeat.oahrservice.hrservice.fileProvider"
             android:exported="false"
-            android:grantUriPermissions="true"
-            android:multiprocess="true">
+            android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/util_code_provider_paths" />
         </provider>
+
+<!--        <provider-->
+<!--            android:name=".util.HRFileProvider"-->
+<!--            android:authorities="${applicationId}.hrservice.fileProvider"-->
+<!--            android:exported="false"-->
+<!--            android:grantUriPermissions="true"-->
+<!--            android:multiprocess="true">-->
+<!--            <meta-data-->
+<!--                android:name="android.support.FILE_PROVIDER_PATHS"-->
+<!--                android:resource="@xml/util_code_provider_paths" />-->
+<!--        </provider>-->
 
     </application>
 
