@@ -52,3 +52,11 @@
 
 #Okio
 -dontwarn org.codehaus.mojo.animal_sniffer.*
+
+#腾讯x5
+-dontwarn dalvik.**
+-dontwarn com.tencent.smtt.**
+
+-keep class com.tencent.smtt.** {*;}
+
+-keep class com.tencent.tbs.** {*;}

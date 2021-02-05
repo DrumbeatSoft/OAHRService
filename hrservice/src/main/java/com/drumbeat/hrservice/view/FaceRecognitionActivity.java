@@ -29,6 +29,7 @@ import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.drumbeat.hrservice.HRService;
 import com.drumbeat.hrservice.R;
+import com.drumbeat.hrservice.util.DataHelper;
 import com.drumbeat.hrservice.util.LogUtils;
 import com.drumbeat.zface.ZFace;
 import com.drumbeat.zface.config.CameraConfig;
@@ -86,8 +87,9 @@ public class FaceRecognitionActivity extends AppCompatActivity {
         btn_start_recognize = findViewById(R.id.btn_start_recognize);
         btn_confirm = findViewById(R.id.btn_confirm);
 
-        Bundle extras = getIntent().getExtras();
-        String oldHeader = extras.getString("oldHeader");
+//        Bundle extras = getIntent().getExtras();
+//        String oldHeader = extras.getString("oldHeader");
+        String oldHeader = (String) DataHelper.getInstance().getData("oldHeader");
         if (!TextUtils.isEmpty(oldHeader)) {
             //将Base64编码字符串解码成Bitmap
             byte[] decodedString = Base64.decode(oldHeader.split(",")[1], Base64.NO_WRAP);

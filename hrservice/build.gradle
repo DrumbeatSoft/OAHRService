@@ -6,11 +6,12 @@ android {
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 1117
-        versionName "1.1.17"
+        versionCode 1118
+        versionName "1.1.18"
         consumerProguardFiles 'proguard-rules.pro'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
     }
     lintOptions {
         abortOnError false
@@ -36,9 +37,10 @@ dependencies {
     implementation 'com.alibaba:fastjson:1.2.67'
     implementation 'com.github.bumptech.glide:glide:4.11.0'
     implementation 'top.zibin:Luban:1.1.8'
-    api 'com.github.githubAtom:Filepicker:1.0.3'
+    api 'com.github.DrumbeatSoft:FilePicker:1.0.4'
     implementation 'com.yanzhenjie:kalle:0.1.7'
     implementation 'com.tencent.tbs.tbssdk:sdk:43903'
     api 'com.github.DrumbeatSoft:ZFace:1.1.6'
     implementation 'com.github.LuckSiege.PictureSelector:picture_library:v2.6.0'
+
 }

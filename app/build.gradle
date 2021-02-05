@@ -12,6 +12,9 @@ android {
         ndk {
             abiFilters 'armeabi-v7a'
         }
+
+        // 这里添加
+        multiDexEnabled true
     }
     buildTypes {
         debug {
@@ -44,5 +47,5 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation project(path: ':hrservice')
 //    implementation 'com.github.DrumbeatSoft:OAHRService:1.1.17'
-
+    implementation 'com.android.support:multidex:1.0.3'
 }

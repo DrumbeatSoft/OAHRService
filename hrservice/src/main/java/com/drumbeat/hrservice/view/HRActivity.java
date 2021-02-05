@@ -31,6 +31,7 @@ import com.drumbeat.hrservice.R;
 import com.drumbeat.hrservice.net.DataObject;
 import com.drumbeat.hrservice.net.JsonConverter;
 import com.drumbeat.hrservice.net.KalleCallback;
+import com.drumbeat.hrservice.util.DataHelper;
 import com.drumbeat.hrservice.util.GZIPCompressUtils;
 import com.drumbeat.hrservice.util.LogUtils;
 import com.drumbeat.hrservice.util.PictureHelper;
@@ -228,6 +229,7 @@ public class HRActivity extends AppCompatActivity {
                         .setFileTypes("pdf")
                         .requestCode(REQUEST_CODE_FROM_ACTIVITY)
                         .start();
+
             }
         }
 
@@ -251,6 +253,7 @@ public class HRActivity extends AppCompatActivity {
                         .setFileTypes("pdf")
                         .requestCode(REQUEST_CODE_FROM_ACTIVITY)
                         .start();
+
             }
         }
 
@@ -544,9 +547,10 @@ public class HRActivity extends AppCompatActivity {
      */
     @JavascriptInterface
     public void faceRecognition(String imgBase64) {
+        DataHelper.getInstance().saveData("oldHeader",imgBase64);
         Intent intent = new Intent();
         intent.setClass(HRActivity.this, FaceRecognitionActivity.class);
-        intent.putExtra("oldHeader", imgBase64);
+//        intent.putExtra("oldHeader", imgBase64);
         startActivityForResult(intent, REQUEST_FACE_CODE);
     }
 
