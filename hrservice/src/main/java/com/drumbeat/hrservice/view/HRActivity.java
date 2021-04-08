@@ -434,17 +434,12 @@ public class HRActivity extends AppCompatActivity {
                     .addHeader("Authorization", "Bearer " + hrToken)
                     .files("files", fileList)
                     .converter(new JsonConverter())
-                    .perform(new KalleCallback<DataObject<List<String>>>() {
+                    .perform(new KalleCallback<DataObject<String>>() {
                         @Override
-                        protected void onSuccess(DataObject<List<String>> succeed) {
+                        protected void onSuccess(DataObject<String> succeed) {
                             hideLoading();
-                            List<String> fileIdList = succeed.getData();
-                            if (fileIdList != null && fileIdList.size() > 0) {
-                                StringBuilder fileIdStr = new StringBuilder();
-                                for (String fileId : fileIdList) {
-                                    fileIdStr.append(fileId).append(",");
-                                }
-                                loadJsMethod(callback, "'" + fileIdStr + "'," + index);
+                            if (!TextUtils.isEmpty(succeed.getData())) {
+                                loadJsMethod(callback, "'" + succeed.getData() + "'," + index);
                             } else {
                                 uploadFileFailed();
                             }
@@ -547,7 +542,7 @@ public class HRActivity extends AppCompatActivity {
      */
     @JavascriptInterface
     public void faceRecognition(String imgBase64) {
-        DataHelper.getInstance().saveData("oldHeader",imgBase64);
+        DataHelper.getInstance().saveData("oldHeader", imgBase64);
         Intent intent = new Intent();
         intent.setClass(HRActivity.this, FaceRecognitionActivity.class);
 //        intent.putExtra("oldHeader", imgBase64);
